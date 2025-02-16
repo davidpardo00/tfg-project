@@ -2,7 +2,7 @@ import csv
 from DeteccionEscenas import scene_list
 
 # Generar archivo CSV con los datos de las escenas
-csv_filename = "escenas_detectadas.csv"
+csv_filename = "detected_scenes.csv"
 
 # Abrir el archivo en modo escritura
 with open(csv_filename, mode='w', newline='') as csv_file:
