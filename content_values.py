@@ -11,7 +11,7 @@ print(df.head())
 content_vals = df['content_val']
 
 # Generar la gráfica
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(10, 5))
 plt.plot(content_vals, label='Content Value', color='b')
 plt.title('Gráfica de Content Value')
 plt.xlabel('Frame')

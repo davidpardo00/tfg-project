@@ -7,7 +7,7 @@ from scenedetect.scene_manager import save_images, StatsManager
 
 # Archivo de video a analizar
 video_folder = "original_videos"
-video_name = "GiveMeControl_MoonKnight.mp4"
+video_name = "CircleOfLove_RudyMancuso.mp4"
 video_path = os.path.join(video_folder, video_name)
 
 # Directorios de salida
