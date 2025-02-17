@@ -3,19 +3,21 @@ from scenedetect.detectors import ContentDetector, AdaptiveDetector
 import subprocess, os, shutil
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_splitter import split_video_ffmpeg
-from scenedetect.scene_manager import save_images
+from scenedetect.scene_manager import save_images, StatsManager
 
 # Archivo de video a analizar
 video_folder = "original_videos"
-video_name = "CircleOfLove_RudyMancuso.mp4"
+video_name = "GiveMeControl_MoonKnight.mp4"
 video_path = os.path.join(video_folder, video_name)
 
 # Directorios de salida
 output_dir_images = "images_scenes"
 output_dir_clips = "clips_video"
+output_dir_csv = "csv_files"
+stats_file = "video_stats.csv"
 
 # Eliminar el contenido de las carpetas antes de procesar
-for folder in [output_dir_images, output_dir_clips]:
+for folder in [output_dir_images, output_dir_clips, output_dir_csv]:
     if os.path.exists(folder):
         shutil.rmtree(folder)  # Borra toda la carpeta
     os.makedirs(folder)  # La vuelve a crear vacía
@@ -25,8 +27,8 @@ video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
 # Agregar detector de contenido (umbral por defecto = 27) o adaptativo
-scene_manager.add_detector(ContentDetector(threshold=27))
-# scene_manager.add_detector(AdaptiveDetector())  
+# scene_manager.add_detector(ContentDetector(threshold=27))
+scene_manager.add_detector(AdaptiveDetector())  
 
 # Procesar el video
 video_manager.set_downscale_factor()  # Escala el video para mejorar rendimiento
@@ -50,7 +52,6 @@ save_images(scene_list, video_manager, num_images=1,
 print("Imágenes de cada escena generadas con éxito.")
 
 # Dividir el video en escenas 
-
 for i, scene in enumerate(scene_list):
     start_time, end_time = scene
     output_file = os.path.join(output_dir_clips, f"Clip_{i+1}.mp4")
@@ -65,6 +66,25 @@ for i, scene in enumerate(scene_list):
     # ffmpeg silenciado con stdout y stderr a DEVNULL
 
 print("Clips de escenas generados con éxito.")
+
+# Crear un archivo CSV con el minutaje de las escenas
+command = [
+    "scenedetect", "-i", video_path, "list-scenes",
+    "--output", output_dir_csv
+]
+
+subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+# Crear archivo CSV con las estadísticas del video
+command = [
+    "scenedetect",
+    "--input", video_path, "--stats", stats_file,
+    "--output", output_dir_csv, "detect-adaptive"
+]
+
+subprocess.run(command, check=True)
+
+print(f"Análisis de escenas completado. Estadísticas guardadas en {stats_file}")
 
 # Liberar recursos
 video_manager.release()
