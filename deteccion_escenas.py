@@ -7,8 +7,10 @@ from scenedetect.scene_manager import save_images, StatsManager
 
 # Archivo de video a analizar
 video_folder = "original_videos"
-video_name = "CircleOfLove_RudyMancuso.mp4"
+video_name = "BreakingBad_IAmTheDanger.mp4"
 video_path = os.path.join(video_folder, video_name)
+
+print("Analizando el siguiente video:", video_name)
 
 # Directorios de salida
 output_dir_images = "images_scenes"
@@ -22,13 +24,22 @@ for folder in [output_dir_images, output_dir_clips, output_dir_csv]:
         shutil.rmtree(folder)  # Borra toda la carpeta
     os.makedirs(folder)  # La vuelve a crear vacía
 
+print("Carpetas de salida limpias y listas para guardar resultados.")
+
 # Cargar el video con VideoManager
 video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
 # Agregar detector de contenido (umbral por defecto = 27) o adaptativo
-# scene_manager.add_detector(ContentDetector(threshold=27))
-scene_manager.add_detector(AdaptiveDetector())  
+content_detector = True  # Cambiar a False para usar el AdaptiveDetector
+
+if content_detector:
+    value_threshold = 27
+    scene_manager.add_detector(ContentDetector(threshold=value_threshold))
+    print("Detector de escenas utilizado: ContentDetector con umbral igual a", value_threshold)
+else:
+    scene_manager.add_detector(AdaptiveDetector())
+    print("Detector de escenas utilizado: AdaptiveDetector")
 
 # Procesar el video
 video_manager.set_downscale_factor()  # Escala el video para mejorar rendimiento
@@ -49,7 +60,7 @@ save_images(scene_list, video_manager, num_images=1,
             image_extension="jpg", output_dir=output_dir_images,
             image_name_template="Scene-$SCENE_NUMBER")
 
-print("Imágenes de cada escena generadas con éxito.")
+print("Imágenes de cada escena generadas con éxito. Guardadas en", output_dir_images)
 
 # Dividir el video en escenas 
 for i, scene in enumerate(scene_list):
@@ -65,7 +76,7 @@ for i, scene in enumerate(scene_list):
     subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # ffmpeg silenciado con stdout y stderr a DEVNULL
 
-print("Clips de escenas generados con éxito.")
+print("Clips de escenas generados con éxito. Guardados en", output_dir_clips)
 
 # Crear un archivo CSV con el minutaje de las escenas
 command = [
