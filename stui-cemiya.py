@@ -663,8 +663,11 @@ def main():
                 }
         </style>
         """, unsafe_allow_html=True)
-    st.image("Cabecera_Cemiya.jpg",width=400)
-
+    
+    if os.path.exists("Cabecera_Cemiya.jpg"):
+        st.image("Cabecera_Cemiya.jpg", width=400)
+    else:
+        st.warning("Imagen 'Cabecera_Cemiya.jpg' no encontrada. Verifica que esté en la carpeta del proyecto.")
 
     with st.sidebar:
         st.image("MICIUCofinanciadoAEI-768x149.jpg",width=400)
