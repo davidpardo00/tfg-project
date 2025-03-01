@@ -6,16 +6,16 @@ from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect.scene_manager import save_images, StatsManager
 
 # Archivo de video a analizar
-video_folder = "original_videos"
-video_name = "BreakingBad_IAmTheDanger.mp4"
+video_folder = "Primeras pruebas/original_videos"
+video_name = "Handicapped_John.mp4"
 video_path = os.path.join(video_folder, video_name)
 
 print("Analizando el siguiente video:", video_name)
 
 # Directorios de salida
-output_dir_images = "images_scenes"
-output_dir_clips = "clips_video"
-output_dir_csv = "csv_files"
+output_dir_images = "Primeras pruebas/images_scenes"
+output_dir_clips = "Primeras pruebas/clips_video"
+output_dir_csv = "Primeras pruebas/csv_files"
 stats_file = "video_stats.csv"
 
 # Eliminar el contenido de las carpetas antes de procesar
@@ -31,7 +31,7 @@ video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
 # Agregar detector de contenido (umbral por defecto = 27) o adaptativo
-content_detector = True  # Cambiar a False para usar el AdaptiveDetector
+content_detector = True # Cambiar a False para usar el AdaptiveDetector
 
 if content_detector:
     value_threshold = 27
