@@ -7,7 +7,7 @@ from scenedetect.scene_manager import save_images, StatsManager
 
 # Archivo de video a analizar
 video_folder = "Primeras pruebas/original_videos"
-video_name = "Handicapped_John.mp4"
+video_name = "FriendsJoey.mp4"
 video_path = os.path.join(video_folder, video_name)
 
 print("Analizando el siguiente video:", video_name)
@@ -70,7 +70,7 @@ for i, scene in enumerate(scene_list):
     command = [
         "ffmpeg", "-i", video_path,
         "-ss", str(start_time.get_seconds()), "-to", str(end_time.get_seconds()),
-        "-c", "copy", output_file
+        output_file
     ]
 
     subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

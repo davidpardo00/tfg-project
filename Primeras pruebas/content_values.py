@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Cargar el archivo CSV con los resultados de las estadísticas
-df = pd.read_csv("csv_files/video_stats.csv")
+df = pd.read_csv("Primeras pruebas/csv_files/video_stats.csv")
 
 # Mostrar las primeras filas del DataFrame para verificar la estructura
 print(df.head())
