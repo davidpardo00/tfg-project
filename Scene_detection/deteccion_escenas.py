@@ -6,16 +6,16 @@ from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect.scene_manager import save_images, StatsManager
 
 # Archivo de video a analizar
-video_folder = "Primeras pruebas/original_videos"
+video_folder = "Scene_detection/original_videos"
 video_name = "FriendsJoey.mp4"
 video_path = os.path.join(video_folder, video_name)
 
 print("Analizando el siguiente video:", video_name)
 
 # Directorios de salida
-output_dir_images = "Primeras pruebas/images_scenes"
-output_dir_clips = "Primeras pruebas/clips_video"
-output_dir_csv = "Primeras pruebas/csv_files"
+output_dir_images = "Scene_detection/images_scenes"
+output_dir_clips = "Scene_detection/clips_video"
+output_dir_csv = "Scene_detection/csv_files"
 stats_file = "video_stats.csv"
 
 # Eliminar el contenido de las carpetas antes de procesar
