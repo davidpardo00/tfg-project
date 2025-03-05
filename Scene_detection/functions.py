@@ -18,14 +18,20 @@ def analyze_video(video_folder, video_name):
 
 def setup_output_directories(output_dirs):
     """
-    Elimina el contenido de las carpetas especificadas y las vuelve a crear vacías.
+    Elimina el contenido de las carpetas especificadas salvo los archivos .gitkeep y las vuelve a crear vacías.
     
     :param output_dirs: Lista de rutas de las carpetas a limpiar.
     """
     for directory in output_dirs:
         if os.path.exists(directory):
-            shutil.rmtree(directory)
-        os.makedirs(directory)
+            for item in os.listdir(directory):
+                item_path = os.path.join(directory, item)
+                if os.path.isfile(item_path) and item != '.gitkeep':
+                    os.remove(item_path)
+                elif os.path.isdir(item_path):
+                    shutil.rmtree(item_path)
+        else:
+            os.makedirs(directory)
     print("Carpetas de salida limpias y listas para guardar resultados.")
 
 def split_video(video_folder, video_name, start_time, end_time, cut_video_folder):
