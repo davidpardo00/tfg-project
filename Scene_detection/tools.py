@@ -5,11 +5,10 @@ from functions import *
 output_dir_images = "Scene_detection/images_scenes"
 output_dir_clips = "Scene_detection/clips_video"
 output_dir_csv = "Scene_detection/csv_files"
-output_dir_cutvideos = "Scene_detection/cut_videos"
 
 # Eliminar el contenido de las carpetas antes de procesar
 setup_output_directories([output_dir_images, output_dir_clips, 
-                          output_dir_csv, output_dir_cutvideos])
+                          output_dir_csv])
 
 # # ! Recortar video
 # # Archivo de video a analizar
