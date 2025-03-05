@@ -18,7 +18,8 @@ def analyze_video(video_folder, video_name):
 
 def setup_output_directories(output_dirs):
     """
-    Elimina el contenido de las carpetas especificadas salvo los archivos .gitkeep y las vuelve a crear vacías.
+    Elimina el contenido de las carpetas especificadas salvo 
+    los archivos .gitkeep y las vuelve a crear vacías.
     
     :param output_dirs: Lista de rutas de las carpetas a limpiar.
     """
@@ -38,10 +39,11 @@ def split_video(video_folder, video_name, start_time, end_time, cut_video_folder
     """
     Recorta un video utilizando ffmpeg.
     
-    :param video_path: Ruta del archivo de video.
+    :param video_folder: Carpeta donde se encuentra el video.
+    :param video_name: Nombre del archivo de video.
     :param start_time: Tiempo de inicio del recorte (formato HH:MM:SS).
     :param end_time: Tiempo de fin del recorte (formato HH:MM:SS).
-    :param output_path: Ruta del archivo de salida.
+    :param cut_video_folder: Carpeta donde se guardará el video recortado.
     """
     video_path = os.path.join(video_folder, video_name)
     output_name = f"{os.path.splitext(video_name)[0]}_cut.mp4"
