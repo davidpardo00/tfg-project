@@ -16,9 +16,9 @@ stats_file = "video_stats.csv"
 setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv])
 
 # Archivo de video a analizar
-# video_folder = "Scene_detection/original_videos"
-video_folder = "Scene_detection/cut_videos"
-video_name = "AmIDreaming_MetroBoomin_cut.mp4"
+video_folder = "Scene_detection/original_videos"
+# video_folder = "Scene_detection/cut_videos"
+video_name = "CircleOfLove_RudyMancuso.mp4"
 video_path = analyze_video(video_folder, video_name)
 
 # Cargar el video con VideoManager
