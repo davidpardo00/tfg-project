@@ -1,23 +1,23 @@
 # 🎓 Proyecto TFG: Análisis de Contenido Audiovisual con IA  
 
-Este proyecto forma parte de mi **Trabajo de Fin de Grado** en **Ingeniería de Tecnologías de Telecomunicación** y tiene como objetivo el desarrollo de un sistema de **análisis y segmentación de contenido audiovisual** mediante **inteligencia artificial**.  
+Este proyecto es parte de mi **Trabajo de Fin de Grado (TFG)** en **Ingeniería de Tecnologías de Telecomunicación**. El objetivo es **analizar contenido audiovisual mediante inteligencia artificial**, utilizando técnicas de **segmentación de video**, **generación de embeddings** y **clustering** para detectar patrones, clasificar contenido y realizar análisis semántico de videos.  
 
 🔍 **El sistema permite:**  
 ✔️ Detección y segmentación automática de escenas en videos con **PySceneDetect**.  
-✔️ Transcripción de audio utilizando **Whisper**.  
-✔️ Análisis de contenido con **modelos de IA (OpenAI, Qwen, etc.)**.  
-✔️ Identificación de **odio, violencia, lenguaje ofensivo y contenido inapropiado**.  
-✔️ Creación de una interfaz web interactiva con **Streamlit** para facilitar su uso.  
+✔️ Generación de **embeddings** de cada escena usando **CLIP**.  
+✔️ **Clustering** de las escenas con **HDBSCAN** para encontrar grupos similares de contenido.  
+✔️ Comparación de resultados entre **CLIP**, **CLIP4Clip** y **SisLip**.  
+✔️ **Visualización** de resultados mediante **UMAP** y gráficos interactivos con **Seaborn** y **Matplotlib**.  
 
 ---
 
 ## 🚀 Instalación y Configuración  
 
 ### **1️⃣ Requisitos**  
-- Python **3.8+**  
-- OpenCV  
-- PySceneDetect  
-- Streamlit  
-- OpenAI API  
-- ffmpeg  
-
+- **Python 3.8+**  
+- **PyTorch** (para usar CLIP y otros modelos)  
+- **PySceneDetect**  
+- **CLIP** (de OpenAI) o **CLIP4Clip**  
+- **HDBSCAN** (para clustering)  
+- **UMAP** (para reducción de dimensionalidad)  
+- **Matplotlib**, **Seaborn** (para visualización)  
