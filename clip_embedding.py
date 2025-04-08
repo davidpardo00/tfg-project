@@ -3,10 +3,13 @@ from PIL import Image
 import os
 import numpy as np
 
-# Cargar modelo CLIP
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
+# Forzar CUDA incluso si is_available() falla
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Cargar modelo CLIP
+model, preprocess = clip.load("ViT-L/14", device=device, jit=False)
+model = model.to(device)
+ 
 def setup_output_directories(output_dirs=["plots", "embeddings"]):
     """
     Elimina el contenido de las carpetas especificadas salvo 
@@ -53,4 +56,5 @@ def process_frames(frame_dir="Scene_detection/images_scenes", save_path="embeddi
     return save_path  # Retorna la ruta para que otros scripts lo usen
 
 if __name__ == "__main__":
+    print("Utilizando", device)
     process_frames()
