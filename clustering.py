@@ -20,7 +20,6 @@ def cluster_embeddings_HDBSCAN(embeddings_2d):
     return clusterer.fit_predict(embeddings_2d)
 
 # Probar CLASSIX para clusterizar
-
 def cluster_embeddings_CLASSIX(embeddings_2d):
     """ Aplica CLASSIX para clusterizar los embeddings. """
     clusterer = CLASSIX(sorting='pca', radius=0.5, minPts=2)
