@@ -1,5 +1,5 @@
-import umap
-import hdbscan
+import umap, hdbscan
+from classix import CLASSIX
 import numpy as np
 import os
 
@@ -14,10 +14,18 @@ def reduce_dimensionality(embeddings, n_components=2):
     reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=n_components, metric='euclidean')
     return reducer.fit_transform(embeddings)
 
-def cluster_embeddings(embeddings_2d):
+def cluster_embeddings_HDBSCAN(embeddings_2d):
     """ Aplica HDBSCAN para clusterizar los embeddings. """
     clusterer = hdbscan.HDBSCAN(min_cluster_size=2, min_samples=1, metric='euclidean')
     return clusterer.fit_predict(embeddings_2d)
+
+# Probar CLASSIX para clusterizar
+
+def cluster_embeddings_CLASSIX(embeddings_2d):
+    """ Aplica CLASSIX para clusterizar los embeddings. """
+    clusterer = CLASSIX(sorting='pca', radius=0.5, minPts=2)
+    clusterer.fit(embeddings_2d)
+    return clusterer.labels_
 
 if __name__ == "__main__":
     embeddings = load_embeddings()

@@ -1,4 +1,4 @@
-from clip_embedding import * 
+from clip_embedding import *
 
 # ! Eliminacion de contenido de carpetas
 # Directorios de salida
