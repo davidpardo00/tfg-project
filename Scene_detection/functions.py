@@ -49,8 +49,11 @@ def split_video(video_folder, video_name, start_time, end_time, cut_video_folder
     output_name = f"{os.path.splitext(video_name)[0]}_cut.mp4"
     output_path = os.path.join(cut_video_folder, output_name)
     command = [
-        'ffmpeg', '-i', video_path, '-ss', 
-        start_time, '-to', end_time, output_path
+        'ffmpeg', '-ss', start_time, '-i', video_path, '-to', end_time,
+        '-copyts',        # 1. Mantiene los timestamps originales
+        '-avoid_negative_ts', '1',
+        '-c', 'copy',     # 2. Evita re-encoding para mayor precisión
+        output_path
     ]
     subprocess.run(command, check=True)
     print("Video recortado con éxito. Guardado en", output_path)
@@ -99,3 +102,24 @@ def create_csv_files(video_path, output_dir_csv, stats_file):
     ]
     subprocess.run(command, check=True)
     print(f"Análisis de escenas completado. Estadísticas guardadas en {stats_file}")
+
+def trim_first_frame_overwrite(file_path, frame_offset, codec="libx264"):
+    """
+    Recorta el video reencodificando para eliminar el primer frame y
+    sobreescribe el archivo original.
+    
+    :param file_path: Ruta del archivo de video a procesar.
+    :param frame_offset: Tiempo en segundos para iniciar el clip.
+    :param codec: Códec de video para reencodificar (por defecto "libx264").
+    """
+    temp_file = file_path + "_trim.mp4"
+    command = [
+        "ffmpeg", "-hide_banner", "-loglevel", "error",
+        "-y",  # Sobrescribe sin preguntar
+        "-ss", str(frame_offset), "-i", file_path,
+        "-c:v", codec,   # Reencodea video usando libx264
+        "-c:a", "copy",  # Copia el audio sin reencodear
+        temp_file
+    ]
+    subprocess.run(command, check=True)
+    os.replace(temp_file, file_path)  # Sobrescribe el archivo original con el temporal

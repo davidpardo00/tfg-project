@@ -18,7 +18,7 @@ setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv])
 # Archivo de video a analizar
 video_folder = "Scene_detection/original_videos"
 # video_folder = "Scene_detection/cut_videos"
-video_name = "CircleOfLove_RudyMancuso.mp4"
+video_name = "Friends_scene.mp4"
 video_path = analyze_video(video_folder, video_name)
 
 # Cargar el video con VideoManager
@@ -26,7 +26,7 @@ video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
 # Agregar detector de contenido (umbral por defecto = 27) o adaptativo
-content_detector = False # Cambiar a False para usar el AdaptiveDetector
+content_detector = True # Cambiar a False para usar el AdaptiveDetector
 
 if content_detector:
     value_threshold = 27
@@ -59,6 +59,16 @@ print("Imágenes de cada escena generadas con éxito. Guardadas en", output_dir_
 
 # Dividir el video en escenas
 split_scenes(video_path, scene_list, output_dir_clips)
+
+# Recortar el primer fotograma de cada clip y sobreescribir el archivo original
+clips = os.listdir(output_dir_clips)
+for clip in clips:
+    clip_path = os.path.join(output_dir_clips, clip)
+    try:
+        trim_first_frame_overwrite(clip_path, 0.03333)
+        print(f"Clip procesado y sobreescrito: {clip_path}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error al recortar {clip_path}: {e}")
 
 # Crear archivos CSV con el minutaje de las escenas y estadísticas del video
 create_csv_files(video_path, output_dir_csv, stats_file)

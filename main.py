@@ -8,7 +8,7 @@ embedding_path = process_frames()
 # Paso 2: Cargar y procesar embeddings
 embeddings = load_embeddings(embedding_path)
 embeddings_2d = reduce_dimensionality(embeddings)
-labels = cluster_embeddings_HDBSCAN(embeddings_2d)
+labels = cluster_embeddings_CLASSIX(embeddings_2d)
 
 # Paso 3: Visualizar
 plot_umap(embeddings_2d)
