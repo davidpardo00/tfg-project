@@ -22,16 +22,9 @@ def cluster_embeddings_HDBSCAN(embeddings_2d):
 # Probar CLASSIX para clusterizar
 def cluster_embeddings_CLASSIX(embeddings):
     """ Aplica CLASSIX para clusterizar los embeddings. """
-    clusterer = CLASSIX(sorting='pca', radius=0.5, minPts=2)
+    clusterer = CLASSIX(sorting='pca', group_merging='density', 
+                        radius=0.5, minPts=10)
     clusterer.fit(embeddings)
     return clusterer.labels_
-
-if __name__ == "__main__":
-    embeddings = load_embeddings()
-    embeddings_2d = reduce_dimensionality(embeddings)
-    labels = cluster_embeddings_CLASSIX(embeddings_2d)
-    np.save("embeddings/embeddings_2d.npy", embeddings_2d)
-    np.save("embeddings/labels.npy", labels)
-    print(f"Clustering completado. Se han encontrado {len(set(labels))} clusters.")
 
 

@@ -26,7 +26,7 @@ video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
 # Agregar detector de contenido (umbral por defecto = 27) o adaptativo
-content_detector = True # Cambiar a False para usar el AdaptiveDetector
+content_detector = False # Cambiar a False para usar el AdaptiveDetector
 
 if content_detector:
     value_threshold = 27
