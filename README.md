@@ -1,23 +1,39 @@
-# 🎓 Proyecto TFG: Análisis y segmentación semántica de contenido audiovisual mediante modelos de lenguaje multimodal
+# TFG - Análisis y segmentación semántica de contenido audiovisual mediante modelos de lenguaje multimodal
 
-Este proyecto es parte de mi **Trabajo de Fin de Grado (TFG)** en **Ingeniería de Tecnologías de Telecomunicación**. El objetivo es **analizar contenido audiovisual mediante inteligencia artificial**, utilizando técnicas de **segmentación de video**, **generación de embeddings** y **clustering** para detectar patrones, clasificar contenido y realizar análisis semántico de videos.  
-
-🔍 **El sistema permite:**  
-✔️ Detección y segmentación automática de escenas en videos con **PySceneDetect**.  
-✔️ Generación de **embeddings** de cada escena usando **CLIP**.  
-✔️ **Clustering** de las escenas con **HDBSCAN** para encontrar grupos similares de contenido.  
-✔️ Comparación de resultados entre **CLIP**, **CLIP4Clip** y **SisLip**.  
-✔️ **Visualización** de resultados mediante **UMAP**. 
+Este Trabajo de Fin de Grado (TFG) tiene como objetivo desarrollar un sistema automático para la **detección, representación y agrupación semántica de escenas en vídeos**, utilizando modelos de lenguaje multimodal de última generación.
 
 ---
 
-## 🚀 Instalación y Configuración  
+## 🧠 Descripción general
 
-### **1️⃣ Requisitos**  
-- **Python 3.8+**  
-- **PyTorch** (para usar CLIP y otros modelos)  
-- **PySceneDetect**  
-- **CLIP** (de OpenAI) o **CLIP4Clip**  
-- **HDBSCAN** (para clustering)  
-- **UMAP** (para reducción de dimensionalidad)  
-- **Matplotlib**, **Seaborn** (para visualización)  
+El sistema realiza las siguientes etapas:
+
+1. **Segmentación automática de escenas** a partir de vídeos, utilizando [PySceneDetect](https://github.com/Breakthrough/PySceneDetect).
+2. **Extracción de embeddings** (representaciones vectoriales) de cada escena con:
+   - CLIP (OpenAI)
+   - CLIP4Clip
+   - SigLip
+3. **Agrupamiento semántico** de escenas mediante clustering con HDBSCAN.
+4. **Visualización de resultados** en 2D mediante reducción de dimensionalidad con UMAP, coloreando las escenas por grupo semántico.
+
+---
+
+## ⚙️ Requisitos
+- Python 3.8 o superior
+- PyTorch
+- OpenAI CLIP (clip)
+- CLIP4Clip
+- SigLig
+- PySceneDetect
+- HDBSCAN
+- UMAP-learn
+- Matplotlib, Seaborn
+
+---
+
+## 👨‍💻 Autor
+David Pardo Solano
+Grado en Ingeniería de Tecnologías de Telecomunicación
+Universidad de Zaragoza
+
+Trabajo Fin de Grado (TFG) – 2025
