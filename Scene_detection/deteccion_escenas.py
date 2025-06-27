@@ -17,7 +17,7 @@ setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv])
 
 # Archivo de video a analizar
 video_folder = "Scene_detection/original_videos"
-video_name = "StarWars_RevengeOfTheSith.mp4"
+video_name = "Friends_scene.mp4"
 video_path = analyze_video(video_folder, video_name)
 
 # Cargar el video con VideoManager
@@ -25,7 +25,7 @@ video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
 # Agregar detector de contenido (umbral por defecto = 27) o adaptativo
-content_detector = True # Cambiar a False para usar el AdaptiveDetector
+content_detector = False # Cambiar a False para usar el AdaptiveDetector
 
 if content_detector:
     value_threshold = 35
