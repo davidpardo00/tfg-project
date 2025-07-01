@@ -123,3 +123,22 @@ def trim_first_frame_overwrite(file_path, frame_offset, codec="libx264"):
     ]
     subprocess.run(command, check=True)
     os.replace(temp_file, file_path)  # Sobrescribe el archivo original con el temporal
+
+def plot_content_value(csv_path):
+    import pandas as pd
+    import matplotlib.pyplot as plt
+
+    df = pd.read_csv(csv_path)
+    if 'content_val' not in df.columns:
+        print("No se encontró la columna 'content_val'.")
+        return
+
+    content_vals = df['content_val']
+    plt.figure(figsize=(10, 5))
+    plt.plot(content_vals, label='Content Value', color='b')
+    plt.title('Gráfica de Content Value')
+    plt.xlabel('Frame')
+    plt.ylabel('Content Value')
+    plt.legend()
+    plt.grid(True)
+    plt.show()

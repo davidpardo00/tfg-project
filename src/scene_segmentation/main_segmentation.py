@@ -4,29 +4,25 @@ import subprocess, os, shutil
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect.scene_manager import save_images, StatsManager
-from functions import *
+from scene_segmentation.functions_segmentation import *
 
-# Directorios de salida
+# Paso 0: Configuracion inicial de directorios y archivos
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 OUTPUTS_DIR = os.path.join(ROOT_DIR, 'outputs')
 output_dir_images = os.path.join(OUTPUTS_DIR, 'images_scenes')
 output_dir_clips = os.path.join(OUTPUTS_DIR, 'clips_video')
 output_dir_csv = os.path.join(OUTPUTS_DIR, 'csv_files')
 stats_file = "video_stats.csv"
-
-# Eliminar el contenido de las carpetas antes de procesar
 setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv])
 
-# Archivo de video a analizar
+# Paso 1: Elegir video a analizar y cargar con VideoManager
 video_folder = os.path.join(ROOT_DIR, 'data', 'original_videos')
 video_name = "Friends_scene.mp4"
 video_path = analyze_video(video_folder, video_name)
-
-# Cargar el video con VideoManager
 video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
-# Agregar detector de contenido (umbral por defecto = 27) o adaptativo
+# Paso 2: Elegir detector de contenido (umbral por defecto = 27) o adaptativo
 content_detector = False # Cambiar a False para usar el AdaptiveDetector
 
 if content_detector:
@@ -37,31 +33,31 @@ else:
     scene_manager.add_detector(AdaptiveDetector())
     print("Detector de escenas utilizado: AdaptiveDetector")
 
-# Procesar el video
+# Paso 3: Procesar el video
 video_manager.set_downscale_factor()  # Escala el video para mejorar rendimiento
 video_manager.start()
 scene_manager.detect_scenes(frame_source=video_manager)
 
-# Obtener las escenas detectadas
+# Paso 4: Obtener las escenas detectadas
 scene_list = scene_manager.get_scene_list()
 
-# Mostrar resultados
+# Paso 5: Mostrar resultados
 print(f"Se detectaron {len(scene_list)} escenas:")
 for i, scene in enumerate(scene_list):
     start_timecode, end_timecode = scene
     print(f"Escena {i+1}: {start_timecode} - {end_timecode}")
 
-# Guardar imágenes de cada escena
+# Paso 6: Guardar imágenes de cada escena
 save_images(scene_list, video_manager, num_images=1, 
             image_extension="jpg", output_dir=output_dir_images,
             image_name_template="Scene-$SCENE_NUMBER")
 
 print("Imágenes de cada escena generadas con éxito. Guardadas en", output_dir_images)
 
-# Dividir el video en escenas
+# Paso 7: Dividir el video en escenas
 split_scenes(video_path, scene_list, output_dir_clips)
 
-# Recortar el primer fotograma de cada clip y sobreescribir el archivo original
+# Paso 8: Recortar el primer fotograma de cada clip y sobreescribir el archivo original
 clips = os.listdir(output_dir_clips)
 for clip in clips:
     clip_path = os.path.join(output_dir_clips, clip)
@@ -71,8 +67,11 @@ for clip in clips:
     except subprocess.CalledProcessError as e:
         print(f"Error al recortar {clip_path}: {e}")
 
-# Crear archivos CSV con el minutaje de las escenas y estadísticas del video
+# Paso 9: Crear archivos CSV con el minutaje de las escenas y estadísticas del video
 create_csv_files(video_path, output_dir_csv, stats_file)
 
-# Liberar recursos
+# Paso 10: Gráfica opcional de valores de contenido
+plot_content_value(os.path.join(output_dir_csv, stats_file))
+
+# Paso 11: Liberar recursos
 video_manager.release()

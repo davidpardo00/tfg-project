@@ -9,3 +9,4 @@ matplotlib
 seaborn
 umap-learn
 hdbscan
+git+https://github.com/openai/CLIP.git

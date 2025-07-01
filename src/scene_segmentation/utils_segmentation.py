@@ -1,4 +1,4 @@
-from functions import * 
+from scene_segmentation.functions_segmentation import * 
 
 # ! Eliminacion de contenido de carpetas
 # Directorios de salida

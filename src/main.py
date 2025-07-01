@@ -1,6 +1,6 @@
 import os, sys
-from embedding_extraction.clip_embedding import *
-from clustering.clustering_tools import *
+from embedding_extraction.functions_embedding import *
+from clustering.functions_clustering import *
 from clustering.visualization import *
 
 # Paso 0: Configuracion inicial
