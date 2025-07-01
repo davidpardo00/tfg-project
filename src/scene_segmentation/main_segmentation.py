@@ -1,10 +1,9 @@
 from scenedetect import SceneManager, VideoManager
-from scenedetect.detectors import ContentDetector, AdaptiveDetector
 import subprocess, os, shutil
 from scenedetect.frame_timecode import FrameTimecode
 from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect.scene_manager import save_images, StatsManager
-from scene_segmentation.functions_segmentation import *
+from functions_segmentation import *
 
 # Paso 0: Configuracion inicial de directorios y archivos
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -12,8 +11,9 @@ OUTPUTS_DIR = os.path.join(ROOT_DIR, 'outputs')
 output_dir_images = os.path.join(OUTPUTS_DIR, 'images_scenes')
 output_dir_clips = os.path.join(OUTPUTS_DIR, 'clips_video')
 output_dir_csv = os.path.join(OUTPUTS_DIR, 'csv_files')
+output_dir_plots = os.path.join(OUTPUTS_DIR, 'plots')
 stats_file = "video_stats.csv"
-setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv])
+setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv, output_dir_plots])
 
 # Paso 1: Elegir video a analizar y cargar con VideoManager
 video_folder = os.path.join(ROOT_DIR, 'data', 'original_videos')
@@ -22,16 +22,8 @@ video_path = analyze_video(video_folder, video_name)
 video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
 
-# Paso 2: Elegir detector de contenido (umbral por defecto = 27) o adaptativo
-content_detector = False # Cambiar a False para usar el AdaptiveDetector
-
-if content_detector:
-    value_threshold = 35
-    scene_manager.add_detector(ContentDetector(threshold=value_threshold))
-    print("Detector de escenas utilizado: ContentDetector con umbral igual a", value_threshold)
-else:
-    scene_manager.add_detector(AdaptiveDetector())
-    print("Detector de escenas utilizado: AdaptiveDetector")
+# Paso 2: Elegir detector de contenido
+select_scene_detector(scene_manager, "adaptive")
 
 # Paso 3: Procesar el video
 video_manager.set_downscale_factor()  # Escala el video para mejorar rendimiento
@@ -58,19 +50,12 @@ print("Imágenes de cada escena generadas con éxito. Guardadas en", output_dir_
 split_scenes(video_path, scene_list, output_dir_clips)
 
 # Paso 8: Recortar el primer fotograma de cada clip y sobreescribir el archivo original
-clips = os.listdir(output_dir_clips)
-for clip in clips:
-    clip_path = os.path.join(output_dir_clips, clip)
-    try:
-        trim_first_frame_overwrite(clip_path, 0.03333)
-        print(f"Clip procesado y sobreescrito: {clip_path}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error al recortar {clip_path}: {e}")
+trim_first_frame_all_clips(output_dir_clips)
 
 # Paso 9: Crear archivos CSV con el minutaje de las escenas y estadísticas del video
 create_csv_files(video_path, output_dir_csv, stats_file)
 
-# Paso 10: Gráfica opcional de valores de contenido
+# Paso 10: Gráfica de valores de contenido
 plot_content_value(os.path.join(output_dir_csv, stats_file))
 
 # Paso 11: Liberar recursos

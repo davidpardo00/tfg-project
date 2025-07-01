@@ -134,11 +134,59 @@ def plot_content_value(csv_path):
         return
 
     content_vals = df['content_val']
+
+    # Ruta a carpeta 'outputs/plots' 
+    plots_dir = os.path.abspath(os.path.join(csv_path, '..', '..', 'plots'))
+    os.makedirs(plots_dir, exist_ok=True)
+
+    # Guardar el gráfico como PNG
+    output_path = os.path.join(plots_dir, 'content_value_plot.png')
     plt.figure(figsize=(10, 5))
     plt.plot(content_vals, label='Content Value', color='b')
-    plt.title('Gráfica de Content Value')
+    plt.title('Gráfica de contenido del video')
     plt.xlabel('Frame')
     plt.ylabel('Content Value')
     plt.legend()
     plt.grid(True)
-    plt.show()
+    plt.savefig(output_path)
+    plt.close()
+
+    print(f"Gráfica guardada en: {output_path}")
+
+def select_scene_detector(scene_manager, detector_type, threshold=27):
+    """
+    Añade un detector de escenas al scene_manager según el tipo especificado.
+    
+    :param scene_manager: Objeto SceneManager al que se le añadirá el detector.
+    :param detector_type: Tipo de detector ('adaptive' o 'content').
+    :param threshold: Umbral para ContentDetector (ignorando si se usa 'adaptive').
+    """
+    from scenedetect.detectors import ContentDetector, AdaptiveDetector
+
+    detector_type = detector_type.lower()
+    if detector_type == "content":
+        scene_manager.add_detector(ContentDetector(threshold=threshold))
+        print(f"Detector de escenas utilizado: ContentDetector con umbral = {threshold}")
+    elif detector_type == "adaptive":
+        scene_manager.add_detector(AdaptiveDetector())
+        print("Detector de escenas utilizado: AdaptiveDetector")
+    else:
+        raise ValueError("Tipo de detector no válido. Usa 'adaptive' o 'content'.")
+
+def trim_first_frame_all_clips(clips_dir, frame_offset=0.03333, codec="libx264"):
+    """
+    Recorta el primer frame de todos los clips en un directorio y sobrescribe los archivos.
+    
+    :param clips_dir: Ruta al directorio que contiene los clips de video.
+    :param frame_offset: Tiempo en segundos para eliminar del inicio de cada clip.
+    :param codec: Códec de video a usar para la reencodificación.
+    """
+    clips = os.listdir(clips_dir)
+    for clip in clips:
+        clip_path = os.path.join(clips_dir, clip)
+        try:
+            trim_first_frame_overwrite(clip_path, frame_offset, codec)
+            print(f"Clip procesado y sobreescrito: {clip_path}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error al recortar {clip_path}: {e}")
+
