@@ -7,16 +7,18 @@ from scenedetect.scene_manager import save_images, StatsManager
 from functions import *
 
 # Directorios de salida
-output_dir_images = "Scene_detection/images_scenes"
-output_dir_clips = "Scene_detection/clips_video"
-output_dir_csv = "Scene_detection/csv_files"
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+OUTPUTS_DIR = os.path.join(ROOT_DIR, 'outputs')
+output_dir_images = os.path.join(OUTPUTS_DIR, 'images_scenes')
+output_dir_clips = os.path.join(OUTPUTS_DIR, 'clips_video')
+output_dir_csv = os.path.join(OUTPUTS_DIR, 'csv_files')
 stats_file = "video_stats.csv"
 
 # Eliminar el contenido de las carpetas antes de procesar
 setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv])
 
 # Archivo de video a analizar
-video_folder = "Scene_detection/original_videos"
+video_folder = os.path.join(ROOT_DIR, 'data', 'original_videos')
 video_name = "Friends_scene.mp4"
 video_path = analyze_video(video_folder, video_name)
 

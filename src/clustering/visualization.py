@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import os
+import os, sys
 
-def plot_umap(embeddings_2d, save_path="plots/umap.png"):
+def plot_umap(embeddings_2d, save_path="outputs/plots/umap.png"):
     """ Genera un scatter plot de los embeddings reducidos con UMAP. """
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     
@@ -16,7 +16,7 @@ def plot_umap(embeddings_2d, save_path="plots/umap.png"):
     plt.close()
     print(f"UMAP guardado en {save_path}")
 
-def plot_clusters(embeddings_2d, labels, save_path="plots/clusters.png"):
+def plot_clusters(embeddings_2d, labels, save_path="outputs/plots/clusters.png"):
     """ Visualiza los clusters obtenidos. """
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     

@@ -82,7 +82,7 @@ def generate_siglip_embedding(image, processor, model, device):
 
     return embedding
 
-def process_frames(video_path, model_type, preprocess_or_processor, model, device, save_path="embeddings/embeddings.npy"):
+def process_frames(video_path, model_type, preprocess_or_processor, model, device, save_path="outputs/embeddings/embeddings.npy"):
     """
     Procesa todos los frames del video original para generar embeddings.
     Se recorre el video frame a frame usando cv2.VideoCapture.

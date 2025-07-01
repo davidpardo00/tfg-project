@@ -1,8 +1,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 # Cargar el archivo CSV con los resultados de las estadísticas
-df = pd.read_csv("Scene_detection/csv_files/video_stats.csv")
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+CSV_PATH = os.path.join(ROOT_DIR, 'outputs', 'csv_files', 'video_stats.csv')
+df = pd.read_csv(CSV_PATH)
 
 # Mostrar las primeras filas del DataFrame para verificar la estructura
 print(df.head())

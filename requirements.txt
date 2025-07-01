@@ -1,0 +1,11 @@
+torch
+opencv-python
+Pillow
+tqdm
+transformers
+scenedetect
+numpy
+matplotlib
+seaborn
+umap-learn
+hdbscan
