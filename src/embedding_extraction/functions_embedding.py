@@ -82,55 +82,60 @@ def generate_siglip_embedding(image, processor, model, device):
 
     return embedding
 
-def process_frames(video_path, model_type, preprocess_or_processor, model, device, save_path="outputs/embeddings/embeddings.npy"):
+def process_frames(video_path, model_type, preprocess_or_processor, model, device, embedding_path="outputs/embeddings/embeddings.npy"):
     """
     Procesa todos los frames del video original para generar embeddings.
     Se recorre el video frame a frame usando cv2.VideoCapture.
-    
+
     :param video_path: Ruta del video original.
-    :param modelo: Modelo a utilizar ("CLIP" o "SigLIP").
-    :param save_path: Ruta donde se guardará el archivo numpy con los embeddings.
+    :param model_type: Modelo a utilizar ("clip", "siglip", etc.)
+    :param embedding_path: Ruta donde se guardará el archivo numpy con los embeddings.
     :return: Ruta del archivo guardado.
     """
     if not os.path.exists(video_path):
         raise FileNotFoundError(f"El video '{video_path}' no existe.")
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)
-    
+    os.makedirs(os.path.dirname(embedding_path), exist_ok=True)
+
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         raise Exception(f"No se pudo abrir el video '{video_path}'")
-    
+
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     embeddings = []
     frame_count = 0
-    
+
     model_type = model_type.lower()
     print("Modelo seleccionado:", model_type)
-    
+
+    from tqdm import tqdm
+    from PIL import Image
+
     # Usamos tqdm para mostrar el progreso
     with tqdm(total=total_frames, desc="Procesando frames") as pbar:
         while True:
             ret, frame = cap.read()
             if not ret:
-                break  
-            # Convertir el frame de BGR (formato OpenCV) a RGB y a un objeto PIL Image
+                break
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(frame_rgb)
-            
+
             if model_type == "clip":
                 embedding = generate_clip_embedding(image, preprocess_or_processor, model, device)
             elif model_type == "siglip":
                 embedding = generate_siglip_embedding(image, preprocess_or_processor, model, device)
-            
+            else:
+                raise ValueError(f"Modelo '{model_type}' no reconocido.")
+
             embeddings.append(embedding)
             frame_count += 1
             pbar.update(1)
-    
+
     cap.release()
-    
+
     embeddings = np.vstack(embeddings)
-    np.save(save_path, embeddings)
-    print(f"Embeddings generados y guardados en {save_path}. Dimensión: {embeddings.shape}. Frames procesados: {frame_count}")
-    return save_path
+    np.save(embedding_path, embeddings)
+    print(f"Embeddings generados y guardados en {embedding_path}. Dimensión: {embeddings.shape}. Frames procesados: {frame_count}")
+    return embedding_path
+
 
 

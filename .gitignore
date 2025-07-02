@@ -123,3 +123,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# folder for audios
+/data/audios
+
+# ps1 files
+activate_39.ps1
+activate_312.ps1
