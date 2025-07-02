@@ -1,7 +1,11 @@
 import umap, hdbscan
-from classix import CLASSIX
+import os, sys
 import numpy as np
-import os
+
+# Añadir el path de la carpeta `classix` a Python
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(os.path.join(ROOT_DIR, "classix"))
+from classix import CLASSIX
 
 def load_embeddings(embedding_path="embeddings/embeddings.npy"):
     """ Carga los embeddings desde un archivo numpy. """

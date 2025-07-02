@@ -1,8 +1,11 @@
-from embedding_extraction.functions_embedding import *
+import os
+import sys
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(ROOT_DIR)
+from src.embedding_extraction.functions_embedding import *
 
 # ! Eliminacion de contenido de carpetas
 # Directorios de salida
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 OUTPUTS_DIR = os.path.join(ROOT_DIR, 'outputs')
 output_dir_plots = os.path.join(OUTPUTS_DIR, 'plots')
 output_dir_embed = os.path.join(OUTPUTS_DIR, 'embeddings')
