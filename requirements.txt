@@ -18,5 +18,3 @@ protobuf
 sentencepiece
 timm
 einops
-safetensors
-torchvision

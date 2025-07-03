@@ -130,3 +130,6 @@ dmypy.json
 # ps1 files
 activate_39.ps1
 activate_312.ps1
+
+# Hugging Face cache
+clip_model.safetensors

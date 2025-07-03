@@ -5,7 +5,6 @@ import importlib
 # Diccionario con: clave = nombre a importar, valor = cómo instalarlo con pip
 required_packages = {
     "torch": "torch",
-    "torchvision": "torchvision",
     "sentencepiece": "sentencepiece",
     "cv2": "opencv-python",
     "PIL": "Pillow",
@@ -24,8 +23,7 @@ required_packages = {
     "scipy": "scipy",
     "google.protobuf": "protobuf",
     "timm": "timm",
-    "einops": "einops",
-    "safetensors": "safetensors"
+    "einops": "einops"
 }
 
 def install(package_name: str):
