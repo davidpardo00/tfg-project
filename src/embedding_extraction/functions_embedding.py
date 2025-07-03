@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 from transformers import AutoProcessor, AutoModel
+from transformers import CLIPVisionModelWithProjection
+from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize, InterpolationMode
 
 def init_model(model_name: str, device):
     """
@@ -31,11 +33,16 @@ def init_model(model_name: str, device):
         model = AutoModel.from_pretrained(jina_model, trust_remote_code=True).to(device)
         return processor, model, "jinaclip"
 
+    elif model_name == "clip4clip":
+        clip4clip_model = "Searchium-ai/clip4clip-webvid150k"
+        processor = None  # No usamos AutoProcessor aquí
+        model = CLIPVisionModelWithProjection.from_pretrained(clip4clip_model).to(device).eval()
+        return processor, model, "clip4clip"
 
     else:
         raise ValueError(f"Modelo no soportado: {model_name!r}")
     
-def setup_output_directories(output_dirs=["plots", "embeddings"]):
+def setup_output_directories(output_dirs):
     """
     Elimina el contenido de las carpetas especificadas salvo los archivos .gitkeep
     y las vuelve a crear vacías.
@@ -106,14 +113,43 @@ def generate_jinaclip_embedding(image, processor, model, device):
         outputs = outputs.to(torch.float32) 
     return outputs.cpu().numpy()
 
-def process_frames(video_path, model_type, preprocess_or_processor, model, device, embedding_path="outputs/embeddings/embeddings.npy"):
+def generate_clip4clip_embedding(image, _, model, device):
     """
-    Procesa todos los frames del video original para generar embeddings.
-    Se recorre el video frame a frame usando cv2.VideoCapture.
+    Genera el embedding de una imagen usando Clip4Clip.
+    :param image: Objeto PIL Image.
+    :param _: Parámetro ignorado (processor no se usa aquí).
+    :param model: Modelo CLIPVisionModelWithProjection.
+    :param device: Dispositivo de PyTorch ("cuda" o "cpu").
+    :return: Numpy array con el embedding.
+    """
+    transform = Compose([
+        Resize(224, interpolation=InterpolationMode.BICUBIC),
+        CenterCrop(224),
+        lambda img: img.convert("RGB"),
+        ToTensor(),
+        Normalize((0.48145466, 0.4578275, 0.40821073),
+                  (0.26862954, 0.26130258, 0.27577711)),
+    ])
+
+    image_tensor = transform(image).unsqueeze(0).to(device)
+
+    with torch.no_grad():
+        output = model(image_tensor)["image_embeds"]
+        output = output / output.norm(dim=-1, keepdim=True)
+        return output.squeeze(0).cpu().numpy()
+
+def process_frames(video_path, model_type, preprocess_or_processor, 
+                   model, device, frame_stride = 3,
+                   embedding_path="outputs/embeddings/embeddings.npy"):
+    """
+    Procesa los frames del video original para generar embeddings.
+    Se recorre el video frame a frame (o con los saltos definidos 
+    por frame-_stride) usando cv2.VideoCapture.
 
     :param video_path: Ruta del video original.
     :param model_type: Modelo a utilizar ("clip", "siglip", etc.)
     :param embedding_path: Ruta donde se guardará el archivo numpy con los embeddings.
+    :param frame_stride: Número de frames a saltar entre cada embedding (default=3).
     :return: Ruta del archivo guardado.
     """
     if not os.path.exists(video_path):
@@ -135,11 +171,19 @@ def process_frames(video_path, model_type, preprocess_or_processor, model, devic
     from PIL import Image
 
     # Usamos tqdm para mostrar el progreso
+    current_frame = 0
     with tqdm(total=total_frames, desc="Procesando frames") as pbar:
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
+
+            # Saltar frames según stride
+            if current_frame % frame_stride != 0:
+                current_frame += 1
+                pbar.update(1)
+                continue
+
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(frame_rgb)
 
@@ -149,18 +193,21 @@ def process_frames(video_path, model_type, preprocess_or_processor, model, devic
                 embedding = generate_siglip_embedding(image, preprocess_or_processor, model, device)
             elif model_type == "jinaclip":
                 embedding = generate_jinaclip_embedding(image, preprocess_or_processor, model, device)
+            elif model_type == "clip4clip":
+                embedding = generate_clip4clip_embedding(image, preprocess_or_processor, model, device)
             else:
                 raise ValueError(f"Modelo '{model_type}' no reconocido.")
 
             embeddings.append(embedding)
             frame_count += 1
+            current_frame += 1
             pbar.update(1)
-
     cap.release()
 
     embeddings = np.vstack(embeddings)
     np.save(embedding_path, embeddings)
     print(f"Embeddings generados y guardados en {embedding_path}. Dimensión: {embeddings.shape}. Frames procesados: {frame_count}")
+    print(f"Total frames leídos: {total_frames}, Embeddings generados: {len(embeddings)}")
     return embedding_path
 
 
