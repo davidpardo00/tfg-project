@@ -13,7 +13,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 OUTPUTS_DIR = os.path.join(ROOT_DIR, 'outputs')
 output_dir_plots = os.path.join(OUTPUTS_DIR, 'plots')
 output_dir_embed = os.path.join(OUTPUTS_DIR, 'embeddings')
-setup_output_directories([output_dir_plots, output_dir_embed])
 
 # Paso 1: Inicialización modelo elegido
 model_used = "siglip"

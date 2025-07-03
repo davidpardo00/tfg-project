@@ -16,3 +16,5 @@ pandas
 scipy
 protobuf
 sentencepiece
+timm
+einops

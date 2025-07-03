@@ -21,7 +21,9 @@ required_packages = {
     "sklearn": "scikit-learn",
     "pandas": "pandas",
     "scipy": "scipy",
-    "google.protobuf": "protobuf"
+    "google.protobuf": "protobuf",
+    "timm": "timm",
+    "einops": "einops"
 }
 
 def install(package_name: str):

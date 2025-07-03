@@ -25,6 +25,13 @@ def init_model(model_name: str, device):
         print(f"SigLIP inicializado en {device}")
         return processor, model, "siglip"
 
+    elif model_name == "jinaclip":
+        jina_model = "jinaai/jina-clip-v2"
+        processor = AutoProcessor.from_pretrained(jina_model, trust_remote_code=True)
+        model = AutoModel.from_pretrained(jina_model, trust_remote_code=True).to(device)
+        return processor, model, "jinaclip"
+
+
     else:
         raise ValueError(f"Modelo no soportado: {model_name!r}")
     
@@ -82,6 +89,23 @@ def generate_siglip_embedding(image, processor, model, device):
 
     return embedding
 
+def generate_jinaclip_embedding(image, processor, model, device):
+    """
+    Genera un embedding de imagen utilizando un modelo JinaClip.
+    
+    :param image: Objeto PIL Image.
+    :param processor: Procesador de Hugging Face.
+    :param model: Modelo JinaClip.
+    :param device: Dispositivo de PyTorch ("cuda" o "cpu").
+    :return: Numpy array con el embedding.
+    """
+    inputs = processor(images=image, return_tensors="pt").to(device)
+    with torch.no_grad():
+        outputs = model.get_image_features(**inputs)
+        # Conversion de formato para poder convertir a numpy
+        outputs = outputs.to(torch.float32) 
+    return outputs.cpu().numpy()
+
 def process_frames(video_path, model_type, preprocess_or_processor, model, device, embedding_path="outputs/embeddings/embeddings.npy"):
     """
     Procesa todos los frames del video original para generar embeddings.
@@ -123,6 +147,8 @@ def process_frames(video_path, model_type, preprocess_or_processor, model, devic
                 embedding = generate_clip_embedding(image, preprocess_or_processor, model, device)
             elif model_type == "siglip":
                 embedding = generate_siglip_embedding(image, preprocess_or_processor, model, device)
+            elif model_type == "jinaclip":
+                embedding = generate_jinaclip_embedding(image, preprocess_or_processor, model, device)
             else:
                 raise ValueError(f"Modelo '{model_type}' no reconocido.")
 
