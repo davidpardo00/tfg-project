@@ -115,7 +115,7 @@ def generate_jinaclip_embedding(image, processor, model, device):
 
 def generate_clip4clip_embedding(image, _, model, device):
     """
-    Genera el embedding de una imagen usando clip4clip.
+    Genera el embedding de una imagen usando Clip4Clip.
     :param image: Objeto PIL Image.
     :param _: Parámetro ignorado (processor no se usa aquí).
     :param model: Modelo CLIPVisionModelWithProjection.

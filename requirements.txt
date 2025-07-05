@@ -18,3 +18,4 @@ protobuf
 sentencepiece
 timm
 einops
+torchvision

@@ -133,5 +133,4 @@ activate_312.ps1
 
 # Hugging Face cache
 clip_model.safetensors
-
 *.safetensors
