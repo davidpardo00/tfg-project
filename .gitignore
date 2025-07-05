@@ -124,8 +124,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# folder for audios
+# folders
 /data/audios
+.vscode
 
 # ps1 files
 activate_39.ps1

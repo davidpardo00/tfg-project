@@ -210,5 +210,34 @@ def process_frames(video_path, model_type, preprocess_or_processor,
     print(f"Total frames leídos: {total_frames}, Embeddings generados: {len(embeddings)}")
     return embedding_path
 
+def save_frames_from_video(video_path, output_folder, frame_stride=3):
+    """
+    Guarda frames extraídos de un video cada 'frame_stride' frames.
+    Devuelve una lista con las rutas de los frames guardados.
+    """
+    os.makedirs(output_folder, exist_ok=True)
+    cap = cv2.VideoCapture(video_path)
+
+    frame_paths = []
+    current_frame = 0
+    saved_index = 0
+
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if current_frame % frame_stride == 0:
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            image = Image.fromarray(frame_rgb)
+            frame_path = os.path.join(output_folder, f"frame_{saved_index:04d}.jpg")
+            image.save(frame_path)
+            frame_paths.append(frame_path)
+            saved_index += 1
+
+        current_frame += 1
+
+    cap.release()
+    return frame_paths
 
 

@@ -1,7 +1,50 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
-import os, sys
+import os, sys, base64
+import plotly.express as px
+import pandas as pd
+
+def plot_umap_interactive(embeddings_2d, image_folder, labels, save_path=None):
+    """
+    Visualiza los embeddings 2D con clusters y miniaturas interactivas al pasar el ratón.
+    """
+
+    image_files = sorted([f for f in os.listdir(image_folder) if f.endswith(".jpg")])
+    image_paths = [os.path.join(image_folder, f) for f in image_files]
+
+    if len(image_paths) != len(embeddings_2d):
+        raise ValueError(f"Se esperaban {len(embeddings_2d)} imágenes pero se encontraron {len(image_paths)}")
+
+    # Relative paths para que se sirvan desde el servidor local
+    rel_paths = [os.path.basename(path) for path in image_paths]
+
+    df = pd.DataFrame({
+        "x": embeddings_2d[:, 0],
+        "y": embeddings_2d[:, 1],
+        "image": rel_paths,
+        "cluster": labels
+    })
+
+    fig = px.scatter(
+        df, x="x", y="y", color=df["cluster"].astype(str),
+        hover_data={"image": False, "cluster": True},
+        custom_data=["image"]
+    )
+
+    # Personalizar tooltip para que muestre la miniatura de la imagen
+    fig.update_traces(
+        marker=dict(size=8, opacity=0.8),
+        hovertemplate="<b>Cluster: %{marker.color}</b><br><img src='%{customdata[0]}' width='100'><extra></extra>"
+    )
+
+    fig.update_layout(title="Visualización UMAP Interactiva con Miniaturas")
+
+    if save_path:
+        fig.write_html(save_path, full_html=True)
+        print(f"Visualización interactiva guardada en {save_path}")
+    else:
+        fig.show()
 
 def plot_umap(embeddings_2d, save_path="outputs/plots/umap.png"):
     """ Genera un scatter plot de los embeddings reducidos con UMAP. """

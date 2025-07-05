@@ -10,10 +10,13 @@ El sistema realiza las siguientes etapas:
 
 1. **Segmentación automática de escenas** a partir de vídeos, utilizando [PySceneDetect](https://github.com/Breakthrough/PySceneDetect).
 2. **Extracción de embeddings** (representaciones vectoriales) de cada escena con:
-   - CLIP (OpenAI)
+   - CLIP
    - SigLip
-3. **Agrupamiento semántico** de escenas mediante clustering con HDBSCAN y/0 CLASSIX.
+   - JinaClip
+   - Clip4Clip
+3. **Agrupamiento semántico** de escenas mediante clustering con HDBSCAN y/o CLASSIX.
 4. **Visualización de resultados** en 2D mediante reducción de dimensionalidad con UMAP, coloreando las escenas por grupo semántico.
+5. **Herramientas extras** para transcripción de escenas
 
 ----
 
@@ -30,6 +33,7 @@ El sistema realiza las siguientes etapas:
 
 ## 👨‍💻 Autor
 David Pardo Solano
+
 Grado en Ingeniería de Tecnologías de Telecomunicación
 Universidad de Zaragoza
 
