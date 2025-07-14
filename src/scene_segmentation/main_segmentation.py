@@ -16,8 +16,9 @@ stats_file = "video_stats.csv"
 setup_output_directories([output_dir_images, output_dir_clips, output_dir_csv, output_dir_plots])
 
 # Paso 1: Elegir video a analizar y cargar con VideoManager
-video_folder = os.path.join(ROOT_DIR, 'data', 'original_videos')
-video_name = "StarWars_RevengeOfTheSith.mp4"
+DB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'DB'))
+video_folder = os.path.join(DB_DIR, 'BBC')
+video_name = "bbc_01.mp4"
 video_path = analyze_video(video_folder, video_name)
 video_manager = VideoManager([video_path])
 scene_manager = SceneManager()
