@@ -1,4 +1,5 @@
-import os, shutil, subprocess
+import os, shutil, subprocess, sys
+from tqdm import tqdm
 from scenedetect.video_splitter import split_video_ffmpeg
 from scenedetect import SceneManager, VideoManager
 from scenedetect.detectors import ContentDetector, AdaptiveDetector
@@ -90,39 +91,20 @@ def create_csv_files(video_path, output_dir_csv, stats_file):
     :param stats_file: Nombre del archivo de estadísticas.
     """
     command = [
-        "scenedetect", "-i", video_path, "list-scenes",
-        "--output", output_dir_csv
+        sys.executable, "-m", "scenedetect", "-i", video_path,
+        "list-scenes", "--output", output_dir_csv
     ]
+    print("[DEBUG] Ejecutando primer comando:", command)
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     command = [
-        "scenedetect",
+        sys.executable, "-m", "scenedetect",
         "--input", video_path, "--stats", stats_file,
         "--output", output_dir_csv, "detect-adaptive"
     ]
+    print("[DEBUG] Ejecutando segundo comando:", command)
     subprocess.run(command, check=True)
     print(f"Análisis de escenas completado. Estadísticas guardadas en {stats_file}")
-
-def trim_first_frame_overwrite(file_path, frame_offset, codec="libx264"):
-    """
-    Recorta el video reencodificando para eliminar el primer frame y
-    sobreescribe el archivo original.
-    
-    :param file_path: Ruta del archivo de video a procesar.
-    :param frame_offset: Tiempo en segundos para iniciar el clip.
-    :param codec: Códec de video para reencodificar (por defecto "libx264").
-    """
-    temp_file = file_path + "_trim.mp4"
-    command = [
-        "ffmpeg", "-hide_banner", "-loglevel", "error",
-        "-y",  # Sobrescribe sin preguntar
-        "-ss", str(frame_offset), "-i", file_path,
-        "-c:v", codec,   # Reencodea video usando libx264
-        "-c:a", "copy",  # Copia el audio sin reencodear
-        temp_file
-    ]
-    subprocess.run(command, check=True)
-    os.replace(temp_file, file_path)  # Sobrescribe el archivo original con el temporal
 
 def plot_content_value(csv_path):
     import pandas as pd
