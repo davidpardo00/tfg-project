@@ -82,6 +82,27 @@ def split_scenes(video_path, scene_list, output_dir_clips):
 
     print("Clips de escenas generados con éxito. Guardados en", output_dir_clips)
 
+def trim_first_frame_overwrite(file_path, frame_offset, codec="libx264"):
+    """
+    Recorta el video reencodificando para eliminar el primer frame y
+    sobreescribe el archivo original.
+    
+    :param file_path: Ruta del archivo de video a procesar.
+    :param frame_offset: Tiempo en segundos para iniciar el clip.
+    :param codec: Códec de video para reencodificar (por defecto "libx264").
+    """
+    temp_file = file_path + "_trim.mp4"
+    command = [
+        "ffmpeg", "-hide_banner", "-loglevel", "error",
+        "-y",  # Sobrescribe sin preguntar
+        "-ss", str(frame_offset), "-i", file_path,
+        "-c:v", codec,   # Reencodea video usando libx264
+        "-c:a", "copy",  # Copia el audio sin reencodear
+        temp_file
+    ]
+    subprocess.run(command, check=True)
+    os.replace(temp_file, file_path)  # Sobrescribe el archivo original con el temporal
+
 def create_csv_files(video_path, output_dir_csv, stats_file):
     """
     Crea archivos CSV con el minutaje de las escenas y las estadísticas del video.
