@@ -18,7 +18,7 @@ if os.path.exists(output_dir_frames_clusters):
     setup_output_directories([output_dir_frames_clusters])
 
 # Paso 1: Inicialización modelo elegido
-model_used = "jinaclip" # Puede ser "clip", "siglip", "jinaclip o "clip4clip"
+model_used = "clip4clip" # Puede ser "clip", "siglip", "jinaclip o "clip4clip"
 preprocess_or_processor, model, model_type = init_model(model_used, device)
 print(f"Modelo {model_used} inicializado correctamente.")
 
