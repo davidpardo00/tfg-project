@@ -67,14 +67,14 @@ def split_scenes(video_path, scene_list, output_dir_clips):
     :param scene_list: Lista de escenas detectadas.
     :param output_dir_clips: Directorio donde se guardarán los clips de video.
     """
-    for i, scene in enumerate(scene_list):
+    for i, scene in enumerate(tqdm(scene_list, desc="Procesando escenas", unit="clip")):
         start_time, end_time = scene
         output_file = os.path.join(output_dir_clips, f"Clip_{i+1}.mp4")
 
         command = [
-            "ffmpeg", "-i", video_path, 
-            "-ss", str(start_time.get_seconds()), "-to", str(end_time.get_seconds()), 
-            output_file
+            "ffmpeg", "-i", video_path,
+            "-ss", str(start_time.get_seconds()), "-to", str(end_time.get_seconds()),
+            "-y", output_file
         ]
 
         subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -115,7 +115,6 @@ def create_csv_files(video_path, output_dir_csv, stats_file):
         sys.executable, "-m", "scenedetect", "-i", video_path,
         "list-scenes", "--output", output_dir_csv
     ]
-    print("[DEBUG] Ejecutando primer comando:", command)
     subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     command = [
@@ -123,7 +122,6 @@ def create_csv_files(video_path, output_dir_csv, stats_file):
         "--input", video_path, "--stats", stats_file,
         "--output", output_dir_csv, "detect-adaptive"
     ]
-    print("[DEBUG] Ejecutando segundo comando:", command)
     subprocess.run(command, check=True)
     print(f"Análisis de escenas completado. Estadísticas guardadas en {stats_file}")
 
@@ -184,12 +182,19 @@ def trim_first_frame_all_clips(clips_dir, frame_offset=0.03333, codec="libx264")
     :param frame_offset: Tiempo en segundos para eliminar del inicio de cada clip.
     :param codec: Códec de video a usar para la reencodificación.
     """
-    clips = os.listdir(clips_dir)
-    for clip in clips:
+    clips = [
+        clip for clip in os.listdir(clips_dir)
+        if clip.lower().endswith(('.mp4', '.mov', '.mkv', '.avi'))
+    ]
+
+    print("Recortando primer frame de cada clip...")
+
+    for clip in tqdm(clips, desc="Procesando clips", unit="clip"):
         clip_path = os.path.join(clips_dir, clip)
         try:
             trim_first_frame_overwrite(clip_path, frame_offset, codec)
-            print(f"Clip procesado y sobreescrito: {clip_path}")
         except subprocess.CalledProcessError as e:
-            print(f"Error al recortar {clip_path}: {e}")
+            tqdm.write(f"Error al recortar {clip_path}: {e}")
+
+    print("Proceso de recorte terminado.")
 
