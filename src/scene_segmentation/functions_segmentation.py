@@ -67,9 +67,11 @@ def split_scenes(video_path, scene_list, output_dir_clips):
     :param scene_list: Lista de escenas detectadas.
     :param output_dir_clips: Directorio donde se guardarán los clips de video.
     """
-    for i, scene in enumerate(tqdm(scene_list, desc="Procesando escenas", unit="clip")):
+    video_basename = os.path.splitext(os.path.basename(video_path))[0]  # nombre sin extensión
+
+    for i, scene in enumerate(tqdm(scene_list, desc=f"Procesando escenas de {video_basename}", unit="clip")):
         start_time, end_time = scene
-        output_file = os.path.join(output_dir_clips, f"Clip_{i+1}.mp4")
+        output_file = os.path.join(output_dir_clips, f"{video_basename}_CLIP_{i+1}.mp4")
 
         command = [
             "ffmpeg", "-i", video_path,
@@ -78,9 +80,8 @@ def split_scenes(video_path, scene_list, output_dir_clips):
         ]
 
         subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # ffmpeg silenciado con stdout y stderr a DEVNULL
 
-    print("Clips de escenas generados con éxito. Guardados en", output_dir_clips)
+    print(f"Clips de escenas generados con éxito para {video_basename}. Guardados en {output_dir_clips}")
 
 def trim_first_frame_overwrite(file_path, frame_offset, codec="libx264"):
     """
