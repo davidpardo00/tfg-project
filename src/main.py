@@ -1,16 +1,14 @@
 import os, sys
 import numpy as np
 from tqdm import tqdm
+from classix import CLASSIX
 from embedding_extraction.functions_embedding import *
 from clustering.functions_clustering import *
 from clustering.visualization import *
 
-# Añadir el path de la carpeta `classix` a Python
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-sys.path.append(os.path.join(ROOT_DIR, "classix"))
-
 # Paso 0: Configuracion inicial
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 MSRVTT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'DB', 'MSRVTT', 'videos', 'all'))
 OUTPUTS_DIR = os.path.join(ROOT_DIR, 'outputs')
 output_dir_plots = os.path.join(OUTPUTS_DIR, 'plots')

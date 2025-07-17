@@ -13,7 +13,7 @@ def init_model(model_name: str, device):
     model_name = model_name.lower()
     
     if model_name == "clip":
-        model, preprocess = clip.load("ViT-L/14", device=device, jit=False)
+        model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
         model = model.to(device)
         print(f"CLIP inicializado en {device}")
         return preprocess, model, "clip"
@@ -138,23 +138,27 @@ def generate_clip4clip_embedding(image, _, model, device):
         output = output / output.norm(dim=-1, keepdim=True)
         return output.squeeze(0).cpu().numpy()
 
-def process_frames(video_path, model_type, preprocess_or_processor, 
-                   model, device, frame_stride = 3,
-                   embedding_path="outputs/embeddings/embeddings.npy"):
+def process_frames(video_path, model_type, preprocess_or_processor,
+                   model, device, frame_stride=3,
+                   embedding_path=None):
     """
     Procesa los frames del video original para generar embeddings.
-    Se recorre el video frame a frame (o con los saltos definidos 
-    por frame-_stride) usando cv2.VideoCapture.
+    Recorre el video frame a frame (con saltos definidos por frame_stride) usando cv2.VideoCapture.
 
     :param video_path: Ruta del video original.
     :param model_type: Modelo a utilizar ("clip", "siglip", etc.)
-    :param embedding_path: Ruta donde se guardará el archivo numpy con los embeddings.
-    :param frame_stride: Número de frames a saltar entre cada embedding (default=3).
-    :return: Ruta del archivo guardado.
+    :param preprocess_or_processor: Preprocesador del modelo.
+    :param model: Modelo cargado.
+    :param device: Dispositivo de PyTorch ("cuda" o "cpu").
+    :param frame_stride: Número de frames a saltar entre cada embedding.
+    :param embedding_path: Ruta donde guardar los embeddings (.npy), o None para no guardar.
+    :return: np.ndarray con todos los embeddings generados.
     """
     if not os.path.exists(video_path):
         raise FileNotFoundError(f"El video '{video_path}' no existe.")
-    os.makedirs(os.path.dirname(embedding_path), exist_ok=True)
+
+    if embedding_path is not None:
+        os.makedirs(os.path.dirname(embedding_path), exist_ok=True)
 
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -162,23 +166,18 @@ def process_frames(video_path, model_type, preprocess_or_processor,
 
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     embeddings = []
+    current_frame = 0
     frame_count = 0
 
     model_type = model_type.lower()
-    print("Modelo seleccionado:", model_type)
+    print(f"Procesando: {os.path.basename(video_path)} con modelo: {model_type}")
 
-    from tqdm import tqdm
-    from PIL import Image
-
-    # Usamos tqdm para mostrar el progreso
-    current_frame = 0
-    with tqdm(total=total_frames, desc="Procesando frames") as pbar:
+    with tqdm(total=total_frames, desc="Procesando frames", leave=False) as pbar:
         while True:
             ret, frame = cap.read()
             if not ret:
                 break
 
-            # Saltar frames según stride
             if current_frame % frame_stride != 0:
                 current_frame += 1
                 pbar.update(1)
@@ -202,13 +201,16 @@ def process_frames(video_path, model_type, preprocess_or_processor,
             frame_count += 1
             current_frame += 1
             pbar.update(1)
+
     cap.release()
 
     embeddings = np.vstack(embeddings)
-    np.save(embedding_path, embeddings)
-    print(f"Embeddings generados y guardados en {embedding_path}. Dimensión: {embeddings.shape}. Frames procesados: {frame_count}")
-    print(f"Total frames leídos: {total_frames}, Embeddings generados: {len(embeddings)}")
-    return embedding_path
+
+    if embedding_path is not None:
+        np.save(embedding_path, embeddings)
+        print(f"Guardado en {embedding_path}. Embeddings shape: {embeddings.shape}")
+
+    return embeddings
 
 def save_frames_from_video(video_path, output_folder, frame_stride=3):
     """
@@ -240,4 +242,52 @@ def save_frames_from_video(video_path, output_folder, frame_stride=3):
     cap.release()
     return frame_paths
 
+def save_central_frame_from_video(video_path, output_path):
+    """
+    Extrae y guarda el frame central de un video como imagen JPG.
+    
+    :param video_path: Ruta al archivo de video.
+    :param output_path: Ruta donde se guardará la imagen del frame central.
+    """
+    cap = cv2.VideoCapture(video_path)
+
+    if not cap.isOpened():
+        raise FileNotFoundError(f"No se pudo abrir el video: {video_path}")
+
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    middle_frame_index = total_frames // 2
+
+    cap.set(cv2.CAP_PROP_POS_FRAMES, middle_frame_index)
+    ret, frame = cap.read()
+    cap.release()
+
+    if not ret:
+        raise ValueError(f"No se pudo leer el frame {middle_frame_index} del video: {video_path}")
+
+    # Convertir a RGB y guardar
+    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    image = Image.fromarray(frame_rgb)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    image.save(output_path, format="JPEG")
+
+def save_central_frames_from_folder(video_folder, output_folder):
+    """
+    Extrae el frame central de todos los videos en una carpeta.
+    
+    :param video_folder: Carpeta con videos .mp4
+    :param output_folder: Carpeta donde se guardarán las imágenes.
+    """
+    os.makedirs(output_folder, exist_ok=True)
+    video_files = [f for f in os.listdir(video_folder) if f.lower().endswith(".mp4")]
+
+    print(f"Procesando {len(video_files)} vídeos desde '{video_folder}'...")
+    
+    for filename in tqdm(video_files, desc="Extrayendo frame central", unit="video"):
+        video_path = os.path.join(video_folder, filename)
+        image_name = os.path.splitext(filename)[0] + ".jpg"
+        output_path = os.path.join(output_folder, image_name)
+        try:
+            save_central_frame_from_video(video_path, output_path)
+        except Exception as e:
+            tqdm.write(f"Error en {filename}: {e}")
 

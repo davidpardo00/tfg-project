@@ -1,11 +1,9 @@
-import umap, hdbscan
-import os, sys
+import umap, os, sys
 import numpy as np
-
-# Añadir el path de la carpeta `classix` a Python
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-sys.path.append(os.path.join(ROOT_DIR, "classix"))
 from classix import CLASSIX
+from hdbscan import HDBSCAN
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 
 def load_embeddings(embedding_path="embeddings/embeddings.npy"):
     """ Carga los embeddings desde un archivo numpy. """
@@ -13,21 +11,48 @@ def load_embeddings(embedding_path="embeddings/embeddings.npy"):
         raise FileNotFoundError(f"El archivo {embedding_path} no existe.")
     return np.load(embedding_path)
 
-def reduce_dimensionality(embeddings, n_components=2):
-    """ Reduce la dimensionalidad de los embeddings con UMAP. """
-    reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=n_components, metric='euclidean')
-    return reducer.fit_transform(embeddings)
+def reduce_dimensionality(embeddings, method="umap", n_components=2, random_state=42):
+    """
+    Reduce los embeddings a 2D usando el método especificado: 'umap' o 'pca'.
 
-def cluster_embeddings_HDBSCAN(embeddings_2d):
-    """ Aplica HDBSCAN para clusterizar los embeddings. """
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=2, min_samples=1, metric='euclidean')
-    return clusterer.fit_predict(embeddings_2d)
+    :param embeddings: Array de embeddings de forma (n_samples, n_features)
+    :param method: 'umap' o 'pca' 
+    :return: Embeddings reducidos a 2D
+    """
+    method = method.lower()
+    
+    if method == "umap":
+        reducer = umap.UMAP(n_components=n_components, random_state=random_state)
+    elif method == "pca":
+        reducer = PCA(n_components=n_components, random_state=random_state)
+    else:
+        raise ValueError(f"Método de reducción no válido: {method}")
+    
+    return reducer.fit_transform(np.array(embeddings))
 
-def cluster_embeddings_CLASSIX(embeddings):
-    """ Aplica CLASSIX para clusterizar los embeddings. """
-    clusterer = CLASSIX(sorting='pca', group_merging='density', 
-                        radius=0.5, minPts=10)
-    clusterer.fit(embeddings)
-    return clusterer.labels_
+def cluster_embeddings_HDBSCAN(embeddings, min_cluster_size=5, min_samples=1):
+    """
+    Aplica clustering HDBSCAN sobre los embeddings.
 
+    :param embeddings: np.ndarray de forma (N, D)
+    :param min_cluster_size: tamaño mínimo de un cluster
+    :param min_samples: número mínimo de muestras para ser core point
+    :return: array de etiquetas
+    """
+    clusterer = HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
+    labels = clusterer.fit_predict(embeddings)
+    return labels
+
+def cluster_embeddings_CLASSIX(embeddings, radius=2.0, minPts=2):
+    """
+    Aplica clustering CLASSIX sobre los embeddings con parámetros ajustables.
+
+    :param embeddings: np.ndarray de forma (N, D)
+    :param radius: radio de agrupación
+    :param minPts: número mínimo de puntos por cluster
+    :return: array de etiquetas
+    """
+    classix = CLASSIX(radius=radius, minPts=minPts)
+    classix.fit(embeddings)
+    return classix.labels_
 
