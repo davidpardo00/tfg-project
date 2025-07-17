@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, glob
 import numpy as np
 import streamlit as st
 import plotly.express as px
@@ -18,8 +18,20 @@ EMBEDDING_DIR = os.path.join(ROOT_DIR, "outputs", "embeddings")
 FRAME_DIR = os.path.join(ROOT_DIR, "outputs", "frames_cluster")
 
 # --- CARGAR EMBEDDINGS ---
-embedding_file = os.path.join(EMBEDDING_DIR, "mean_embeddings_clip.npy")
-video_names_file = os.path.join(EMBEDDING_DIR, "video_names_clip.npy")
+# Buscar automáticamente el archivo de embeddings más reciente
+embedding_files = glob.glob(os.path.join(EMBEDDING_DIR, "mean_embeddings_*.npy"))
+if not embedding_files:
+    raise FileNotFoundError("❌ No se encontró ningún archivo 'mean_embeddings_*.npy' en la carpeta de embeddings.")
+
+# Elegir el primero encontrado
+embedding_file = sorted(embedding_files)[-1]
+
+# Extraer el nombre del modelo desde el nombre del archivo
+model_name = os.path.basename(embedding_file).replace("mean_embeddings_", "").replace(".npy", "")
+
+# Buscar el archivo correspondiente de nombres de video
+video_names_file = os.path.join(EMBEDDING_DIR, f"video_names_{model_name}.npy")
+st.sidebar.markdown(f"📌 <b>Modelo cargado:</b> <code>{model_name}</code>", unsafe_allow_html=True)
 
 embeddings = np.load(embedding_file)
 video_names = np.load(video_names_file)
@@ -33,7 +45,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Visualización Interactiva de Embeddings por Clustering")
+st.title(f"Visualización Interactiva de Embeddings por Clustering - Modelo: {model_name}")
 
 # --- SIDEBAR ---
 method = st.sidebar.selectbox("Método de clustering", ["CLASSIX", "HDBSCAN"])
@@ -116,16 +128,6 @@ st.download_button(
     file_name="clustering.png",
     mime="image/png"
 )
-
-search_term = st.sidebar.text_input("🔎 Buscar vídeo por nombre")
-if search_term:
-    matches = df[df["video"].str.contains(search_term, case=False)]
-    if not matches.empty:
-        st.markdown(f"### Resultados para '{search_term}'")
-        for _, row in matches.iterrows():
-            st.image(row["image_path"], caption=f"{row['video']} (Cluster {row['label']})", width=150)
-    else:
-        st.warning("No se encontraron vídeos con ese nombre.")
 
 
 
