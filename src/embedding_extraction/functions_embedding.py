@@ -30,7 +30,10 @@ def init_model(model_name: str, device):
     elif model_name == "jinaclip":
         jina_model = "jinaai/jina-clip-v2"
         processor = AutoProcessor.from_pretrained(jina_model, trust_remote_code=True)
+        print("✅ Modelo cargado y enviado a dispositivo.")
         model = AutoModel.from_pretrained(jina_model, trust_remote_code=True).to(device)
+        print("✅ Modelo preparado completamente.")
+
         return processor, model, "jinaclip"
 
     elif model_name == "clip4clip":

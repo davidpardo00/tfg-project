@@ -1,4 +1,4 @@
-import os, sys, torch
+import sys, torch, os
 import numpy as np
 from tqdm import tqdm
 from embedding_extraction.functions_embedding import *
@@ -8,6 +8,7 @@ from classix import CLASSIX
 
 # Paso 0: Configuración inicial
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cpu")
 # Directorios
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 VIDEO_DIR = os.path.abspath(os.path.join(ROOT_DIR, '..', 'RESULTADOS EMBEDDINGS', 'clips_videos'))
@@ -20,9 +21,8 @@ os.makedirs(output_dir_plots, exist_ok=True)
 os.makedirs(output_dir_frames, exist_ok=True)
 
 # Paso 1: Inicializar modelo
-model_used = "siglip" # Puede ser "clip", "siglip", "jinaclip" o "clip4clip"
+model_used = "clip" # Puede ser "clip", "siglip", "jinaclip" o "clip4clip"
 preprocess_or_processor, model, model_type = init_model(model_used, device)
-print(f"Modelo {model_used} inicializado correctamente en {device}.")
 
 # Paso 2: Procesar todos los vídeos
 video_names = []
@@ -68,22 +68,22 @@ video_names_path = os.path.join(output_dir_embed, f"video_names_{model_used}.npy
 np.save(video_names_path, np.array(video_names))
 print(f"Nombres de vídeos guardados en: {video_names_path}")
 
-# Paso 5: Clusterizar con embeddings originales (mejor calidad)
-labels = cluster_embeddings_CLASSIX(mean_embeddings)
+# # Paso 5: Clusterizar con embeddings originales (mejor calidad)
+# labels = cluster_embeddings_CLASSIX(mean_embeddings)
 
-# Paso 6: Reducir a 2D solo para visualización
-embeddings_2d = reduce_dimensionality(mean_embeddings)
+# # Paso 6: Reducir a 2D solo para visualización
+# embeddings_2d = reduce_dimensionality(mean_embeddings)
 
-# Paso 7: Visualizaciones
-plot_umap(
-    embeddings_2d,
-    save_path=os.path.join(output_dir_plots, f"umap_{model_used}_mean_embeddings.png")
-)
-plot_clusters(
-    embeddings_2d, labels,
-    save_path=os.path.join(output_dir_plots, f"clusters_{model_used}_mean_embeddings.png")
-)
-plot_umap_interactive(
-    embeddings_2d, image_folder=output_dir_frames, labels=labels,
-    save_path=os.path.join(output_dir_plots, f"umap_interactive_{model_used}_mean_embeddings.html")
-)
+# # Paso 7: Visualizaciones
+# plot_umap(
+#     embeddings_2d,
+#     save_path=os.path.join(output_dir_plots, f"umap_{model_used}_mean_embeddings.png")
+# )
+# plot_clusters(
+#     embeddings_2d, labels,
+#     save_path=os.path.join(output_dir_plots, f"clusters_{model_used}_mean_embeddings.png")
+# )
+# plot_umap_interactive(
+#     embeddings_2d, image_folder=output_dir_frames, labels=labels,
+#     save_path=os.path.join(output_dir_plots, f"umap_interactive_{model_used}_mean_embeddings.html")
+# )

@@ -18,21 +18,23 @@ EMBEDDING_DIR = os.path.join(ROOT_DIR, "outputs", "embeddings")
 FRAME_DIR = os.path.join(ROOT_DIR, "outputs", "frames_cluster")
 
 # --- CARGAR EMBEDDINGS ---
-# Buscar automáticamente el archivo de embeddings más reciente
-embedding_files = glob.glob(os.path.join(EMBEDDING_DIR, "mean_embeddings_*.npy"))
+# Buscar todos los archivos de embeddings disponibles
+embedding_files = sorted(glob.glob(os.path.join(EMBEDDING_DIR, "mean_embeddings_*.npy")))
 if not embedding_files:
     raise FileNotFoundError("❌ No se encontró ningún archivo 'mean_embeddings_*.npy' en la carpeta de embeddings.")
 
-# Elegir el primero encontrado
-embedding_file = sorted(embedding_files)[-1]
+# Crear una lista legible para el selectbox
+embedding_options = [os.path.basename(f).replace("mean_embeddings_", "").replace(".npy", "") for f in embedding_files]
+model_name = st.sidebar.selectbox("Selecciona el modelo de embeddings:", embedding_options)
 
-# Extraer el nombre del modelo desde el nombre del archivo
-model_name = os.path.basename(embedding_file).replace("mean_embeddings_", "").replace(".npy", "")
-
-# Buscar el archivo correspondiente de nombres de video
+# Cargar los archivos seleccionados
+embedding_file = os.path.join(EMBEDDING_DIR, f"mean_embeddings_{model_name}.npy")
 video_names_file = os.path.join(EMBEDDING_DIR, f"video_names_{model_name}.npy")
+
+# Mostrar información del modelo cargado
 st.sidebar.markdown(f"📌 <b>Modelo cargado:</b> <code>{model_name}</code>", unsafe_allow_html=True)
 
+# Cargar datos
 embeddings = np.load(embedding_file)
 video_names = np.load(video_names_file)
 
@@ -75,9 +77,9 @@ df["video"] = video_names
 df["image_path"] = df["video"].apply(lambda x: os.path.join(FRAME_DIR, f"{x}.jpg"))
 
 # --- FILTROS OPCIONALES ---
-cluster_filter = st.sidebar.multiselect("Filtrar clusters", options=sorted(df["label"].unique()))
-if cluster_filter:
-    df = df[df["label"].isin(cluster_filter)]
+clusters_to_hide = st.sidebar.multiselect("Ocultar clusters", options=sorted(df["label"].unique()))
+if clusters_to_hide:
+    df = df[~df["label"].isin(clusters_to_hide)]
 
 # --- GRAFICA INTERACTIVA ---
 st.subheader("Embeddings agrupados por clustering")
@@ -87,7 +89,7 @@ fig = px.scatter(
     y="y",
     color=df["label"].astype(str),
     hover_name="video",
-    custom_data=["image_path"],
+    custom_data=["image_path", "label"],  # Añadimos label aquí
     color_discrete_sequence=px.colors.qualitative.Set1,
 )
 
@@ -97,37 +99,44 @@ fig.update_traces(
     <img src='%{customdata[0]}' width='150'><br>
     x: %{x}<br>
     y: %{y}<br>
-    Cluster: %{marker.color}<br>
+    Cluster: %{customdata[1]}<br>
     <extra></extra>
     """
 )
 
 st.plotly_chart(fig, height=2000)
 
+# --- DESCARGA DE GRÁFICO ---
+st.download_button(
+    "📥 Descargar gráfico como imagen",
+    fig.to_image(format="png"),
+    file_name=f"clustering_{model_name}.png",
+    mime="image/png"
+)
+
 # --- INFORMACIÓN DE CLUSTERS ---
 st.markdown("### 📊 Información de clusters")
 cluster_sizes = df["label"].value_counts().sort_index()
 st.write(cluster_sizes.rename("Nº vídeos").to_frame())
 
+# --- SELECCIÓN DIRECTA DE CLUSTER ---
+cluster_options = ["Todos"] + sorted(df["label"].unique())
+selected_cluster = st.selectbox("🔎 Selecciona un cluster para ver sus frames", cluster_options)
 
 # --- VISTA PREVIA POR CLUSTER ---
-st.subheader("🖼️ Vista previa de videos divididos por clusters")
-
-for label in df["label"].value_counts().index:
-    cluster_df = df[df["label"] == label]
-    st.markdown(f"### Cluster {label} ({len(cluster_df)} videos)")
+if selected_cluster == "Todos":
+    st.subheader("🖼️ Vista previa de videos divididos por clusters")
+    for label in df["label"].value_counts().index:
+        cluster_df = df[df["label"] == label]
+        st.markdown(f"### Cluster {label} ({len(cluster_df)} videos)")
+        cols = st.columns(5)
+        for i, (_, row) in enumerate(cluster_df.iterrows()):
+            with cols[i % 5]:
+                st.image(row["image_path"], caption=row["video"])
+else:
+    st.subheader(f"🖼️ Vista previa de videos - Cluster {selected_cluster}")
+    cluster_df = df[df["label"] == selected_cluster]
     cols = st.columns(5)
     for i, (_, row) in enumerate(cluster_df.iterrows()):
         with cols[i % 5]:
-            st.image(row["image_path"], caption=row["video"], width=100)
-
-# --- DESCARGA DE GRÁFICO ---
-st.download_button(
-    "📥 Descargar gráfico como imagen",
-    fig.to_image(format="png"),
-    file_name="clustering.png",
-    mime="image/png"
-)
-
-
-
+            st.image(row["image_path"], caption=row["video"])

@@ -127,6 +127,7 @@ dmypy.json
 # folders
 /data/audios
 .vscode
+/outputs/frames_cluster
 
 # ps1 files
 activate_39.ps1

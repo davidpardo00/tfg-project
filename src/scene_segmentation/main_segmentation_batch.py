@@ -12,7 +12,7 @@ setup_output_directories([output_dir_clips])
 
 # Paso 1: Carpeta con los videos a procesar
 DB_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'DB'))
-video_folder = os.path.join(DB_DIR, 'MSRVTT', 'videos', 'DB_MSRVTT')
+video_folder = os.path.join(DB_DIR, 'MSRVTT', 'videos', 'DB_MSRVTT_300')
 
 # Paso 2: Procesar cada video secuencialmente
 video_files = [f for f in os.listdir(video_folder) if f.lower().endswith(('.mp4', '.avi', '.mov', '.mkv'))]

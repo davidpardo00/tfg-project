@@ -3,14 +3,14 @@ import pandas as pd
 
 # Ruta al archivo Excel con los nombres de los videos (sin extensión o con ella)
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
-excel_path = os.path.join(ROOT_DIR, 'RESULTADOS EMBEDDINGS', 'video_selection.xlsx')
+excel_path = os.path.join(ROOT_DIR, 'RESULTADOS EMBEDDINGS', 'video_selection_15.xlsx')
 columna_nombre = "video_name"  # Cambia al nombre real de la columna si es distinto
 
 # Carpeta de origen (donde están todos los videos)
 source_folder = os.path.join(ROOT_DIR, 'DB', 'MSRVTT', 'videos', 'all')
 
 # Carpeta de destino (donde copiarás los videos seleccionados)
-destination_folder = os.path.join(ROOT_DIR, 'DB', 'MSRVTT', 'videos', 'DB_MSRVTT')
+destination_folder = os.path.join(ROOT_DIR, 'DB', 'MSRVTT', 'videos', 'DB_MSRVTT_300')
 
 # Leer Excel
 df = pd.read_excel(excel_path, engine="openpyxl")
