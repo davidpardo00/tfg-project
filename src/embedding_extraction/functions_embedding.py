@@ -2,16 +2,16 @@ import os, shutil, torch, cv2, clip
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
-from transformers import AutoProcessor, AutoModel
+from transformers import AutoProcessor, AutoModel, AutoModelForCausalLM
 from transformers import CLIPVisionModelWithProjection
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize, InterpolationMode
 
 def init_model(model_name: str, device):
     """
-    Inicializa y devuelve el modelo, su preprocesador y el nombre del modelo.
+    Inicializa y devuelve el modelo, su preprocesador y el tipo de modelo.
     """
     model_name = model_name.lower()
-    
+
     if model_name == "clip":
         model, preprocess = clip.load("ViT-B/32", device=device, jit=False)
         model = model.to(device)
@@ -22,25 +22,37 @@ def init_model(model_name: str, device):
         sig_name = "google/siglip-base-patch16-224"
         processor = AutoProcessor.from_pretrained(sig_name)
         model = AutoModel.from_pretrained(sig_name)
-        model.eval()
-        model.to(device)
+        model.eval().to(device)
         print(f"SigLIP inicializado en {device}")
         return processor, model, "siglip"
 
     elif model_name == "jinaclip":
         jina_model = "jinaai/jina-clip-v2"
         processor = AutoProcessor.from_pretrained(jina_model, trust_remote_code=True)
-        print("✅ Modelo cargado y enviado a dispositivo.")
-        model = AutoModel.from_pretrained(jina_model, trust_remote_code=True).to(device)
-        print("✅ Modelo preparado completamente.")
-
+        model = AutoModel.from_pretrained(jina_model, trust_remote_code=True)
+        model = model.to(device)
+        print(f"JinaCLIP inicializado en {device}")
         return processor, model, "jinaclip"
 
     elif model_name == "clip4clip":
         clip4clip_model = "Searchium-ai/clip4clip-webvid150k"
-        processor = None  # No usamos AutoProcessor aquí
         model = CLIPVisionModelWithProjection.from_pretrained(clip4clip_model).to(device).eval()
-        return processor, model, "clip4clip"
+        print(f"CLIP4CLIP inicializado en {device}")
+        return None, model, "clip4clip"
+
+    elif model_name == "openclip":
+        openclip_model = "laion/CLIP-ViT-B-32-laion2B-s34B-b79K"
+        processor = AutoProcessor.from_pretrained(openclip_model)
+        model = AutoModel.from_pretrained(openclip_model).to(device).eval()
+        print(f"OpenCLIP inicializado en {device}")
+        return processor, model, "openclip"
+
+    elif model_name == "git":
+        processor = AutoProcessor.from_pretrained("microsoft/git-base")
+        model = AutoModel.from_pretrained("microsoft/git-base")
+        model = model.to(device)
+        print("GIT inicializado en", device)
+        return processor, model, "git"
 
     else:
         raise ValueError(f"Modelo no soportado: {model_name!r}")
@@ -141,6 +153,31 @@ def generate_clip4clip_embedding(image, _, model, device):
         output = output / output.norm(dim=-1, keepdim=True)
         return output.squeeze(0).cpu().numpy()
 
+def generate_openclip_embedding(frame, processor, model, device):
+    """
+    Extrae un embedding de una imagen usando OpenCLIP.
+    """
+    inputs = processor(images=frame, return_tensors="pt").to(device)
+
+    with torch.no_grad():
+        outputs = model.get_image_features(**inputs)
+        embedding = outputs.cpu().numpy().squeeze()
+
+    return embedding
+
+def generate_git_embedding(frame, processor, model, device):
+    """
+    Genera un embedding de una imagen usando el modelo GIT.
+    """
+    inputs = processor(images=frame, return_tensors="pt").to(device)
+
+    with torch.no_grad():
+        vision_outputs = model.image_encoder(**inputs)
+        last_hidden_state = vision_outputs.last_hidden_state 
+        embedding = last_hidden_state.mean(dim=1).squeeze().cpu().numpy()
+
+    return embedding
+
 def process_frames(video_path, model_type, preprocess_or_processor,
                    model, device, frame_stride=3,
                    embedding_path=None):
@@ -197,6 +234,10 @@ def process_frames(video_path, model_type, preprocess_or_processor,
                 embedding = generate_jinaclip_embedding(image, preprocess_or_processor, model, device)
             elif model_type == "clip4clip":
                 embedding = generate_clip4clip_embedding(image, preprocess_or_processor, model, device)
+            elif model_type == "git":
+                embedding = generate_git_embedding(image, preprocess_or_processor, model, device)
+            elif model_type == "openclip":
+                embedding = generate_openclip_embedding(image, preprocess_or_processor, model, device)
             else:
                 raise ValueError(f"Modelo '{model_type}' no reconocido.")
 
@@ -213,7 +254,7 @@ def process_frames(video_path, model_type, preprocess_or_processor,
         np.save(embedding_path, embeddings)
         print(f"Guardado en {embedding_path}. Embeddings shape: {embeddings.shape}")
 
-    return embeddings
+    return embedding
 
 def save_frames_from_video(video_path, output_folder, frame_stride=3):
     """
