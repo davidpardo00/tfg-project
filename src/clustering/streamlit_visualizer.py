@@ -1,9 +1,10 @@
-import os, sys, glob
+import os, sys, glob, clip
 import numpy as np
 import streamlit as st
 import plotly.express as px
 import pandas as pd
 from PIL import Image
+from transformers import CLIPProcessor, CLIPModel
 
 # Agregar carpeta src al path
 SRC_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -13,9 +14,9 @@ if SRC_DIR not in sys.path:
 from clustering.functions_clustering import *
 
 # --- CONFIGURACIÓN GLOBAL ---
-ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-EMBEDDING_DIR = os.path.join(ROOT_DIR, "outputs", "embeddings")
-FRAME_DIR = os.path.join(ROOT_DIR, "outputs", "frames_cluster")
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+EMBEDDING_DIR = os.path.join(ROOT_DIR, "RESULTADOS EMBEDDINGS", "embeddings")
+FRAME_DIR = os.path.join(ROOT_DIR, "RESULTADOS EMBEDDINGS", "frames_cluster")
 
 # --- CARGAR EMBEDDINGS ---
 # Buscar todos los archivos de embeddings disponibles
@@ -122,6 +123,18 @@ st.write(cluster_sizes.rename("Nº vídeos").to_frame())
 # --- SELECCIÓN DIRECTA DE CLUSTER ---
 cluster_options = ["Todos"] + sorted(df["label"].unique())
 selected_cluster = st.selectbox("🔎 Selecciona un cluster para ver sus frames", cluster_options)
+
+# # --- DESCRIPCIÓN SEMÁNTICA ---
+# if st.button("📌 Describir clusters semánticamente con CLIP"):
+#     st.subheader("🧠 Descripción semántica de cada cluster")
+#     clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+#     clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#     clip_model.to(device)
+    
+#     descriptions = describe_clusters_with_clip(embeddings, labels, clip_processor, clip_model, device)
+#     for label, desc in descriptions.items():
+#         st.markdown(f"**Cluster {label}** ➤ {desc}")
 
 # --- VISTA PREVIA POR CLUSTER ---
 if selected_cluster == "Todos":

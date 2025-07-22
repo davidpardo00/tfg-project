@@ -234,6 +234,58 @@ def process_frames(video_path, model_type, preprocess_or_processor,
 
     return embeddings
 
+def process_frames_clip4clip_batch(video_path, model, device, frame_stride=3, embedding_path=None):
+    """
+    Procesa un conjunto de frames en lote para CLIP4CLIP, que es más eficiente para este modelo.
+    """
+
+    transform = Compose([
+        Resize(224, interpolation=InterpolationMode.BICUBIC),
+        CenterCrop(224),
+        lambda img: img.convert("RGB"),
+        ToTensor(),
+        Normalize((0.48145466, 0.4578275, 0.40821073),
+                  (0.26862954, 0.26130258, 0.27577711)),
+    ])
+
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        raise Exception(f"No se pudo abrir el video '{video_path}'")
+
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    frames = []
+    current_frame = 0
+
+    with tqdm(total=total_frames, desc="Procesando frames (batch)", leave=False) as pbar:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+            if current_frame % frame_stride == 0:
+                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                image = Image.fromarray(frame_rgb)
+                frames.append(transform(image))
+            current_frame += 1
+            pbar.update(1)
+
+    cap.release()
+
+    if len(frames) == 0:
+        raise ValueError("No se extrajo ningún frame del video.")
+
+    input_batch = torch.stack(frames).to(device)
+
+    with torch.no_grad():
+        output = model(input_batch)["image_embeds"]
+        output = output / output.norm(dim=-1, keepdim=True)
+        embeddings = output.cpu().numpy()
+
+    if embedding_path is not None:
+        np.save(embedding_path, embeddings)
+        print(f"Guardado en {embedding_path}. Embeddings shape: {embeddings.shape}")
+
+    return embeddings
+
 def save_frames_from_video(video_path, output_folder, frame_stride=3):
     """
     Guarda frames extraídos de un video cada 'frame_stride' frames.
@@ -312,4 +364,3 @@ def save_central_frames_from_folder(video_folder, output_folder):
             save_central_frame_from_video(video_path, output_path)
         except Exception as e:
             tqdm.write(f"Error en {filename}: {e}")
-

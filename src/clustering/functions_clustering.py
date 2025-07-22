@@ -1,9 +1,10 @@
-import umap, os, sys
+import umap, os, sys, torch
 import numpy as np
 from classix import CLASSIX
 from hdbscan import HDBSCAN
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+from sklearn.metrics.pairwise import cosine_similarity
 
 def load_embeddings(embedding_path="embeddings/embeddings.npy"):
     """ Carga los embeddings desde un archivo numpy. """
@@ -56,3 +57,47 @@ def cluster_embeddings_CLASSIX(embeddings, radius=2.0, minPts=2):
     classix.fit(embeddings)
     return classix.labels_
 
+def describe_clusters_with_clip(embeddings, labels, tokenizer, model, device, candidate_labels=None):
+    """
+    Asigna una etiqueta textual a cada clúster usando similitud de embeddings con CLIP.
+
+    Args:
+        embeddings (np.ndarray): Embeddings visuales (shape: [N, D])
+        labels (np.ndarray): Etiquetas de clústeres (shape: [N])
+        tokenizer: Tokenizador de CLIP
+        model: Modelo CLIP
+        device: Dispositivo ('cpu' o 'cuda')
+        candidate_labels (List[str]): Lista de etiquetas textuales a comparar
+
+    Returns:
+        dict: {cluster_id: best_label}
+    """
+
+    if candidate_labels is None:
+        candidate_labels = [
+            "man", "woman", "people talking", "city", "nature", "car", "indoor", "outdoor",
+            "celebration", "interview", "news", "sports", "walking", "dancing", "laughing",
+            "crying", "crowd", "building", "room", "daylight", "night", "animal", "close-up"
+        ]
+
+    # Prepara textos y calcula sus embeddings
+    text_inputs = tokenizer(candidate_labels, padding=True, return_tensors="pt").to(device)
+    with torch.no_grad():
+        text_features = model.get_text_features(**text_inputs)
+        text_features /= text_features.norm(p=2, dim=-1, keepdim=True)  # normaliza
+
+    # Para cada clúster, calcular su media y comparar
+    cluster_descriptions = {}
+    for label in np.unique(labels):
+        cluster_indices = np.where(labels == label)[0]
+        cluster_embedding = embeddings[cluster_indices].mean(axis=0)
+        cluster_embedding = cluster_embedding / np.linalg.norm(cluster_embedding)
+
+        similarities = cosine_similarity(
+            cluster_embedding.reshape(1, -1),
+            text_features.cpu().numpy()
+        )
+        best_match = candidate_labels[np.argmax(similarities)]
+        cluster_descriptions[label] = best_match
+
+    return cluster_descriptions

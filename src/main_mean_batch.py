@@ -23,7 +23,7 @@ os.makedirs(output_dir_plots, exist_ok=True)
 os.makedirs(output_dir_frames, exist_ok=True)
 
 # Paso 1: Inicializar modelo
-model_used = "openclip"  # Puede ser "clip", "siglip", "jinaclip", "clip4clip", "openclip"
+model_used = "clip4clip"  # Puede ser "clip", "siglip", "jinaclip", "clip4clip", "openclip"
 print(f">> Inicializando modelo {model_used}...")
 preprocess_or_processor, model, model_type = init_model(model_used, device)
 print(f"✅ Modelo {model_used} inicializado correctamente en {device}.")
@@ -45,10 +45,16 @@ for filename in tqdm(video_files, desc="Procesando vídeos", unit="video"):
 
     try:
         print("   - Extrayendo embeddings de frames...")
-        embeddings = process_frames(
-            video_path, model_type, preprocess_or_processor,
-            model, device, embedding_path=None
-        )
+        if model_type == "clip4clip":
+            embeddings = process_frames_clip4clip_batch(
+                video_path, model, device, embedding_path=None
+                )
+        else:
+            embeddings = process_frames(
+                video_path, model_type, preprocess_or_processor, 
+                model, device, embedding_path=None
+                )
+
         print("   - Embeddings extraídos con shape:", embeddings.shape)
 
         print("   - Calculando embedding medio...")
