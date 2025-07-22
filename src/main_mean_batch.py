@@ -23,7 +23,7 @@ os.makedirs(output_dir_plots, exist_ok=True)
 os.makedirs(output_dir_frames, exist_ok=True)
 
 # Paso 1: Inicializar modelo
-model_used = "git"  # Puede ser "clip", "siglip", "jinaclip", "clip4clip", "openclip", "git"
+model_used = "openclip"  # Puede ser "clip", "siglip", "jinaclip", "clip4clip", "openclip"
 print(f">> Inicializando modelo {model_used}...")
 preprocess_or_processor, model, model_type = init_model(model_used, device)
 print(f"✅ Modelo {model_used} inicializado correctamente en {device}.")

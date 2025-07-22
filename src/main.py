@@ -18,7 +18,7 @@ if os.path.exists(output_dir_frames_clusters):
     setup_output_directories([output_dir_frames_clusters])
 
 # Paso 1: Inicialización modelo elegido
-model_used = "git" # Puede ser "clip", "siglip", "jinaclip", "clip4clip", "openclip", "git"
+model_used = "openclip" # Puede ser "clip", "siglip", "jinaclip", "clip4clip", "openclip"
 preprocess_or_processor, model, model_type = init_model(model_used, device)
 print(f"Modelo {model_used} inicializado correctamente.")
 
@@ -29,7 +29,7 @@ embedding_filename = f"{video_name}_{model_used}.npy"
 
 # Paso 3: Procesar frames y generar embeddings
 embedding_path = os.path.join(output_dir_embed, embedding_filename)
-embedding_path = process_frames(
+process_frames(
     video_path, model_type, preprocess_or_processor, model, device,
     embedding_path=embedding_path
 )

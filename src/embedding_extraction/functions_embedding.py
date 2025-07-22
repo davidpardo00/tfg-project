@@ -46,14 +46,7 @@ def init_model(model_name: str, device):
         model = AutoModel.from_pretrained(openclip_model).to(device).eval()
         print(f"OpenCLIP inicializado en {device}")
         return processor, model, "openclip"
-
-    elif model_name == "git":
-        processor = AutoProcessor.from_pretrained("microsoft/git-base")
-        model = AutoModel.from_pretrained("microsoft/git-base")
-        model = model.to(device)
-        print("GIT inicializado en", device)
-        return processor, model, "git"
-
+    
     else:
         raise ValueError(f"Modelo no soportado: {model_name!r}")
     
@@ -165,19 +158,6 @@ def generate_openclip_embedding(frame, processor, model, device):
 
     return embedding
 
-def generate_git_embedding(frame, processor, model, device):
-    """
-    Genera un embedding de una imagen usando el modelo GIT.
-    """
-    inputs = processor(images=frame, return_tensors="pt").to(device)
-
-    with torch.no_grad():
-        vision_outputs = model.image_encoder(**inputs)
-        last_hidden_state = vision_outputs.last_hidden_state 
-        embedding = last_hidden_state.mean(dim=1).squeeze().cpu().numpy()
-
-    return embedding
-
 def process_frames(video_path, model_type, preprocess_or_processor,
                    model, device, frame_stride=3,
                    embedding_path=None):
@@ -234,8 +214,6 @@ def process_frames(video_path, model_type, preprocess_or_processor,
                 embedding = generate_jinaclip_embedding(image, preprocess_or_processor, model, device)
             elif model_type == "clip4clip":
                 embedding = generate_clip4clip_embedding(image, preprocess_or_processor, model, device)
-            elif model_type == "git":
-                embedding = generate_git_embedding(image, preprocess_or_processor, model, device)
             elif model_type == "openclip":
                 embedding = generate_openclip_embedding(image, preprocess_or_processor, model, device)
             else:
@@ -254,7 +232,7 @@ def process_frames(video_path, model_type, preprocess_or_processor,
         np.save(embedding_path, embeddings)
         print(f"Guardado en {embedding_path}. Embeddings shape: {embeddings.shape}")
 
-    return embedding
+    return embeddings
 
 def save_frames_from_video(video_path, output_folder, frame_stride=3):
     """
