@@ -38,12 +38,14 @@ tfg-project-main/
 ├── data/                  # Vídeos originales y recortes
 ├── outputs/               # Resultados intermedios y finales (embeddings, gráficos, transcripciones…)
 ├── src/
-│   ├── scene_segmentation/       # Segmentación de vídeo con PySceneDetect
-│   ├── transcribe_videos/        # Transcripción automática con Whisper
-│   ├── embedding_extraction/     # Extracción de embeddings con distintos modelos
-│   ├── clustering/               # Algoritmos de agrupamiento y visualización
-│   └── utils/                    # Utilidades y herramientas auxiliares
-├── streamlit\_visualizer.py      # Interfaz interactiva para explorar los resultados
+│   ├── scene_segmentation/                   # Segmentación de vídeo con PySceneDetect
+│   ├── transcribe_videos/                    # Transcripción automática con Whisper
+│   ├── embedding_extraction/                 # Extracción de embeddings con distintos modelos
+│   ├── evaluation/                           # Modulo de evaluación numerica de resultados
+│   ├── clustering/                           # Algoritmos de agrupamiento y visualización
+    │       ├── streamlit\_visualizer.py      # Interfaz interactiva para explorar los resultados
+│   └── utils/                                # Utilidades y herramientas auxiliares
+
 ├── requirements.txt              # Dependencias del entorno
 └── README.md
 
@@ -56,7 +58,7 @@ tfg-project-main/
 1. Instalar dependencias:
    ```bash
    pip install -r requirements.txt
-````
+   ````
 
 2. Ejecutar visualización interactiva:
 
