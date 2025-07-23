@@ -1,40 +1,76 @@
-# TFG - Análisis y segmentación semántica de contenido audiovisual mediante modelos de lenguaje multimodal
+# 🎬 TFG – Análisis y segmentación semántica de contenido audiovisual mediante modelos multimodales
 
-Este Trabajo de Fin de Grado (TFG) tiene como objetivo desarrollar un sistema automático para la **detección, representación y agrupación semántica de escenas en vídeos**, utilizando modelos de lenguaje multimodal de última generación.
+Este Trabajo de Fin de Grado tiene como objetivo desarrollar un sistema automático para la **detección, representación y agrupación semántica de escenas en vídeo**, utilizando modelos multimodales de última generación.
 
-----
+El sistema permite explorar vídeos sin etiquetar, extrayendo información semántica mediante embeddings generados por distintos modelos, agrupando fragmentos similares y visualizando los resultados de forma interactiva.
+
+---
 
 ## 🧠 Descripción general
 
-El sistema realiza las siguientes etapas:
+El flujo del sistema se compone de las siguientes etapas:
 
-1. **Segmentación automática de escenas** a partir de vídeos, utilizando [PySceneDetect](https://github.com/Breakthrough/PySceneDetect).
-2. **Extracción de embeddings** (representaciones vectoriales) de cada escena con:
-   - CLIP
-   - SigLip
-   - JinaClip
-   - Clip4Clip
-3. **Agrupamiento semántico** de escenas mediante clustering con HDBSCAN y/o CLASSIX.
-4. **Visualización de resultados** en 2D mediante reducción de dimensionalidad con UMAP, coloreando las escenas por grupo semántico.
-5. **Herramientas extras** para transcripción de escenas
+1. **Segmentación automática de escenas**, utilizando [PySceneDetect](https://github.com/Breakthrough/PySceneDetect).
+2. **Transcripción automática de audio**, con [Whisper](https://github.com/openai/whisper).
+3. **Extracción de embeddings semánticos**, mediante los siguientes modelos:
+   - CLIP (OpenAI)
+   - OpenCLIP (LAION)
+   - SigLIP (Google)
+   - CLIP4Clip (vídeo)
+4. **Clustering no supervisado** de escenas utilizando:
+   - HDBSCAN
+   - CLASSIX
+5. **Reducción de dimensionalidad** con:
+   - UMAP
+   - PCA
+6. **Visualización interactiva de resultados** mediante Streamlit, permitiendo:
+   - Comparar modelos, algoritmos y parámetros
+   - Examinar los clústeres con previsualización de cada escena
+   - Descargar visualizaciones y estadísticas
 
-----
+---
 
-## Estructura
-- `src/embedding_extraction`: Scripts para extracción de embeddings con modelo a elegir.
-- `src/scene_segmentation`: Scripts para detección y corte de escenas usando PySceneDetect.
-- `src/clustering`: Scripts para agrupar y visualizar embeddings.
-- `src/transcribe_videos`: Scripts para transcripcion de escenas mediante 'Whisper'.
-- `classix/`: Algoritmo 'CLASSIX'.
-- `data/videos_originales`: Directorio vídeos de entrada.
-- `outputs/...`: Salidas de resultados de ejecucción.
+## 📁 Estructura del repositorio
 
-----
+```
+
+tfg-project-main/
+├── data/                  # Vídeos originales y recortes
+├── outputs/               # Resultados intermedios y finales (embeddings, gráficos, transcripciones…)
+├── src/
+│   ├── scene_segmentation/       # Segmentación de vídeo con PySceneDetect
+│   ├── transcribe_videos/        # Transcripción automática con Whisper
+│   ├── embedding_extraction/     # Extracción de embeddings con distintos modelos
+│   ├── clustering/               # Algoritmos de agrupamiento y visualización
+│   └── utils/                    # Utilidades y herramientas auxiliares
+├── streamlit\_visualizer.py      # Interfaz interactiva para explorar los resultados
+├── requirements.txt              # Dependencias del entorno
+└── README.md
+
+````
+
+---
+
+## 🚀 Ejecución rápida
+
+1. Instalar dependencias:
+   ```bash
+   pip install -r requirements.txt
+````
+
+2. Ejecutar visualización interactiva:
+
+   ```bash
+   streamlit run streamlit_visualizer.py
+   ```
+
+---
 
 ## 👨‍💻 Autor
-David Pardo Solano
 
+**David Pardo Solano**
 Grado en Ingeniería de Tecnologías de Telecomunicación
 Universidad de Zaragoza
+Trabajo Fin de Grado – Curso 2024/2025
 
-Trabajo Fin de Grado (TFG) – 2025
+```

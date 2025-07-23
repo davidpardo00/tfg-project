@@ -56,11 +56,18 @@ reduction = st.sidebar.selectbox("Reducción de dimensionalidad", ["UMAP", "PCA"
 
 # Clustering params
 if method == "CLASSIX":
-    radius = st.sidebar.slider("Radio (radius)", 0.1, 5.0, 0.4, 0.1)
-    minPts = st.sidebar.slider("Mínimo puntos (minPts)", 1, 20, 5)
+    radius = st.sidebar.slider("Radio", 0.1, 5.0, 0.4, 0.1)
+    minPts = st.sidebar.slider("Mínimo puntos", 1, 20, 5)
 else:
     min_cluster_size = st.sidebar.slider("Tamaño mínimo del cluster", 2, 30, 5)
     min_samples = st.sidebar.slider("Muestras mínimas", 1, 10, 1)
+    cluster_selection_epsilon = st.sidebar.slider("Cluster selection epsilon", 0.0, 1.0, 0.0, 0.01)
+    use_max_cluster_size = st.sidebar.checkbox("Usar tamaño máximo de clúster", value=False)
+
+    if use_max_cluster_size:
+        max_cluster_size = st.sidebar.slider("Tamaño máximo del cluster", 10, 1000, 500, 10)
+    else:
+        max_cluster_size = None
 
 # Reducción params
 embeddings_2d = reduce_dimensionality(embeddings, method=reduction, n_components=2, random_state=42)
@@ -69,7 +76,10 @@ embeddings_2d = reduce_dimensionality(embeddings, method=reduction, n_components
 if method == "CLASSIX":
     labels = cluster_embeddings_CLASSIX(embeddings, radius=radius, minPts=minPts)
 elif method == "HDBSCAN":
-    labels = cluster_embeddings_HDBSCAN(embeddings, min_cluster_size=min_cluster_size, min_samples=min_samples)
+    labels = cluster_embeddings_HDBSCAN(embeddings, min_cluster_size=min_cluster_size, 
+                                        min_samples=min_samples, 
+                                        cluster_selection_epsilon=cluster_selection_epsilon,
+                                        max_cluster_size=max_cluster_size)
 
 # --- DATAFRAME PARA PLOTLY ---
 df = pd.DataFrame(embeddings_2d, columns=["x", "y"])

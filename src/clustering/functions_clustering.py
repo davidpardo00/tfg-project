@@ -1,7 +1,7 @@
 import umap, os, sys, torch
 import numpy as np
 from classix import CLASSIX
-from hdbscan import HDBSCAN
+from sklearn.cluster import HDBSCAN
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.metrics.pairwise import cosine_similarity
@@ -31,7 +31,8 @@ def reduce_dimensionality(embeddings, method="umap", n_components=2, random_stat
     
     return reducer.fit_transform(np.array(embeddings))
 
-def cluster_embeddings_HDBSCAN(embeddings, min_cluster_size=5, min_samples=1):
+def cluster_embeddings_HDBSCAN(embeddings, min_cluster_size=5, min_samples=1, 
+                               cluster_selection_epsilon=0.5, max_cluster_size=None):
     """
     Aplica clustering HDBSCAN sobre los embeddings.
 
@@ -40,7 +41,10 @@ def cluster_embeddings_HDBSCAN(embeddings, min_cluster_size=5, min_samples=1):
     :param min_samples: número mínimo de muestras para ser core point
     :return: array de etiquetas
     """
-    clusterer = HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
+    clusterer = HDBSCAN(min_cluster_size=min_cluster_size, 
+                        min_samples=min_samples, 
+                        cluster_selection_epsilon=cluster_selection_epsilon,
+                        max_cluster_size=max_cluster_size)
     labels = clusterer.fit_predict(embeddings)
     return labels
 
