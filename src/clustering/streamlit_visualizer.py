@@ -130,6 +130,21 @@ st.markdown("### 📊 Información de clusters")
 cluster_sizes = df["label"].value_counts().sort_index()
 st.write(cluster_sizes.rename("Nº vídeos").to_frame())
 
+# --- MÉTRICAS DE CLUSTERING ---
+metricas = calcular_metricas_clustering(labels)
+metricas_df = pd.DataFrame(metricas, index=[method])
+st.markdown("### 📈 Métricas del clustering")
+st.table(metricas_df)
+
+# --- DESCARGA DE MÉTRICAS ---
+csv = metricas_df.to_csv(index=True).encode("utf-8")
+st.download_button(
+    label="📥 Descargar métricas como CSV",
+    data=csv,
+    file_name=f"metricas_clustering_{model_name}_{method}.csv",
+    mime="text/csv"
+)
+
 # --- SELECCIÓN DIRECTA DE CLUSTER ---
 cluster_options = ["Todos"] + sorted(df["label"].unique())
 selected_cluster = st.selectbox("🔎 Selecciona un cluster para ver sus frames", cluster_options)

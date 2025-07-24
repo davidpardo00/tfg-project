@@ -1,5 +1,6 @@
 import umap, os, sys, torch
 import numpy as np
+import pandas as pd
 from classix import CLASSIX
 from sklearn.cluster import HDBSCAN
 from sklearn.decomposition import PCA
@@ -105,3 +106,21 @@ def describe_clusters_with_clip(embeddings, labels, tokenizer, model, device, ca
         cluster_descriptions[label] = best_match
 
     return cluster_descriptions
+
+def calcular_metricas_clustering(labels):
+    df = pd.DataFrame({"label": labels})
+    num_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+    cluster_sizes = df["label"].value_counts()
+    max_cluster_size = cluster_sizes[cluster_sizes.index != -1].max()
+    mean_cluster_size = cluster_sizes[cluster_sizes.index != -1].mean()
+    if -1 in cluster_sizes:
+        noise_ratio = cluster_sizes[-1] / len(labels)
+    else:
+        noise_ratio = 0.0
+
+    return {
+        "Nº clústeres": str(num_clusters),
+        "Tamaño medio de clúster": f"{mean_cluster_size:.2f}",
+        "Tamaño máximo de clúster": str(max_cluster_size),
+        "Puntos marcados como ruido": f"{round(noise_ratio * 100, 1)}%"
+    }
