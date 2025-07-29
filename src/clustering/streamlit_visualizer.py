@@ -1,4 +1,4 @@
-import os, sys, glob, clip
+import os, sys, glob, clip, torch 
 import numpy as np
 import streamlit as st
 import plotly.express as px
@@ -130,6 +130,17 @@ st.markdown("### 📊 Información de clusters")
 cluster_sizes = df["label"].value_counts().sort_index()
 st.write(cluster_sizes.rename("Nº vídeos").to_frame())
 
+# --- HISTOGRAMA DE TAMAÑOS DE CLÚSTERES ---
+import matplotlib.pyplot as plt
+
+st.markdown("### 📊 Distribución del tamaño de los clústeres")
+cluster_sizes = df["label"].value_counts()
+fig, ax = plt.subplots()
+cluster_sizes[cluster_sizes.index != -1].plot(kind="hist", bins=20, ax=ax)
+ax.set_xlabel("Tamaño de clúster")
+ax.set_ylabel("Frecuencia")
+st.pyplot(fig)
+
 # --- MÉTRICAS DE CLUSTERING ---
 metricas = calcular_metricas_clustering(labels)
 metricas_df = pd.DataFrame(metricas, index=[method])
@@ -149,32 +160,42 @@ st.download_button(
 cluster_options = ["Todos"] + sorted(df["label"].unique())
 selected_cluster = st.selectbox("🔎 Selecciona un cluster para ver sus frames", cluster_options)
 
-# # --- DESCRIPCIÓN SEMÁNTICA ---
-# if st.button("📌 Describir clusters semánticamente con CLIP"):
-#     st.subheader("🧠 Descripción semántica de cada cluster")
-#     clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
-#     clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
-#     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#     clip_model.to(device)
-    
-#     descriptions = describe_clusters_with_clip(embeddings, labels, clip_processor, clip_model, device)
-#     for label, desc in descriptions.items():
-#         st.markdown(f"**Cluster {label}** ➤ {desc}")
+# --- DESCRIPCIÓN SEMÁNTICA ---
+descriptions = {}
+if st.button("📌 Describir clusters semánticamente con CLIP"):
+    clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32", use_safetensors=True)
+    clip_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    clip_model.to(device)
+
+    descriptions = describe_clusters_with_clip(
+        embeddings, labels, clip_processor, clip_model, device
+    )
 
 # --- VISTA PREVIA POR CLUSTER ---
 if selected_cluster == "Todos":
     st.subheader("🖼️ Vista previa de videos divididos por clusters")
-    for label in df["label"].value_counts().index:
+
+    ordered_labels = df["label"].value_counts().sort_values().index
+
+    for label in ordered_labels:
         cluster_df = df[df["label"] == label]
+        desc = descriptions.get(label, "Sin descripción disponible")
         st.markdown(f"### Cluster {label} ({len(cluster_df)} videos)")
+        st.markdown(f"**🧠 Descripción semántica:** *{desc}*")
+
         cols = st.columns(5)
         for i, (_, row) in enumerate(cluster_df.iterrows()):
             with cols[i % 5]:
-                st.image(row["image_path"], caption=row["video"])
+                st.image(row["image_path"], caption=row["video"], use_container_width=True)
+
 else:
-    st.subheader(f"🖼️ Vista previa de videos - Cluster {selected_cluster}")
     cluster_df = df[df["label"] == selected_cluster]
+    desc = descriptions.get(selected_cluster, "Sin descripción disponible")
+    st.subheader(f"🖼️ Vista previa de videos - Cluster {selected_cluster}")
+    st.markdown(f"**🧠 Descripción semántica:** *{desc}*")
+
     cols = st.columns(5)
     for i, (_, row) in enumerate(cluster_df.iterrows()):
         with cols[i % 5]:
-            st.image(row["image_path"], caption=row["video"])
+            st.image(row["image_path"], caption=row["video"], use_container_width=True)
