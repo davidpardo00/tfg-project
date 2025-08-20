@@ -152,6 +152,12 @@ def describe_clusters_with_clip(embeddings, labels, clip_processor, clip_model, 
 
     # Transiciones y efectos
     "a fade to black", "a zoom in", "a camera pan", "a split screen", "a color filter effect"
+
+    # Descripcione de animales y naturaleza
+    "a dog", "a cat", "a bird", "a fish", "a horse", "a cow", "a sheep", "a pig", "a chicken", "a rabbit",
+    "a lion", "a tiger", "an elephant", "a giraffe", "a bear", "a monkey", "a dolphin", "a whale", "a shark", "a snake",
+    "a frog", "a turtle", "a lizard", "a spider", "a butterfly", "an animal in the wild", "a pet at home", "a farm animal", 
+    "a zoo animal", "a bird in flight", "a fish swimming", "a dog playing", "a cat climbing a tree", "a horse running",
     ]
 
     # Preprocesar texto
@@ -182,14 +188,20 @@ def describe_clusters_with_clip(embeddings, labels, clip_processor, clip_model, 
 
 def calcular_metricas_clustering(labels):
     df = pd.DataFrame({"label": labels})
-    num_clusters = len(set(labels)) - (1 if -1 in labels else 0)
     cluster_sizes = df["label"].value_counts()
-    max_cluster_size = cluster_sizes[cluster_sizes.index != -1].max()
-    mean_cluster_size = cluster_sizes[cluster_sizes.index != -1].mean()
+
+    # Determinar qué clúster considerar como ruido
     if -1 in cluster_sizes:
-        noise_ratio = cluster_sizes[-1] / len(labels)
+        ruido_idx = -1
     else:
-        noise_ratio = 0.0
+        ruido_idx = cluster_sizes.idxmax()  # índice del clúster más grande
+
+    # Recalcular métricas ignorando el ruido
+    num_clusters = len(set(labels)) - 1  # Quitamos el ruido
+    sizes_without_noise = cluster_sizes.drop(index=ruido_idx)
+    max_cluster_size = sizes_without_noise.max()
+    mean_cluster_size = sizes_without_noise.mean()
+    noise_ratio = cluster_sizes[ruido_idx] / len(labels)
 
     return {
         "Nº clústeres": str(num_clusters),

@@ -56,12 +56,12 @@ reduction = st.sidebar.selectbox("Reducción de dimensionalidad", ["UMAP", "PCA"
 
 # Clustering params
 if method == "CLASSIX":
-    radius = st.sidebar.slider("Radio", 0.1, 5.0, 0.4, 0.1)
-    minPts = st.sidebar.slider("Mínimo puntos", 1, 20, 5)
+    radius = st.sidebar.slider("Radio", 0.1, 3.0, 0.5, 0.1)
+    minPts = st.sidebar.slider("Mínimo puntos", 1, 20, 3)
 else:
-    min_cluster_size = st.sidebar.slider("Tamaño mínimo del cluster", 2, 30, 5)
-    min_samples = st.sidebar.slider("Muestras mínimas", 1, 10, 1)
-    cluster_selection_epsilon = st.sidebar.slider("Cluster selection epsilon", 0.0, 1.0, 0.0, 0.01)
+    min_cluster_size = st.sidebar.slider("Tamaño mínimo del cluster", 2, 30, 3)
+    min_samples = st.sidebar.slider("Muestras mínimas", 1, 10, 2)
+    cluster_selection_epsilon = st.sidebar.slider("Cluster selection epsilon", 0.0, 1.0, 0.1, 0.01)
     use_max_cluster_size = st.sidebar.checkbox("Usar tamaño máximo de clúster", value=False)
 
     if use_max_cluster_size:
